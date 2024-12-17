@@ -2,6 +2,14 @@
 [[ml-ad-apis]]
 = {ml-cap} {anomaly-detect} APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 You can use the following APIs to perform {ml} {anomaly-detect} activities.
 
 See also <<ml-apis>>, <<ml-df-analytics-apis>>,  <<ml-df-trained-models-apis>>.

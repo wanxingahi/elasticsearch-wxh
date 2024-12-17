@@ -1,6 +1,14 @@
 [[features-apis]]
 == Features APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 You can use the following APIs to introspect and manage Features provided
 by Elasticsearch and Elasticsearch plugins.
 

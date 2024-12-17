@@ -1,6 +1,14 @@
 [[cluster]]
 == Cluster APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 ["float",id="cluster-nodes"]
 === Node specification
 

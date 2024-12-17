@@ -2,6 +2,14 @@
 [[transform-apis]]
 = {transform-cap} APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 * <<put-transform>> 
 * <<delete-transform>>
 * <<get-transform>>

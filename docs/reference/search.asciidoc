@@ -1,6 +1,14 @@
 [[search]]
 == Search APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 Search APIs are used to search and aggregate data stored in {es} indices and
 data streams. For an overview and related tutorials, see <<search-your-data>>.
 

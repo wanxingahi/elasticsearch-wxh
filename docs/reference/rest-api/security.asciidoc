@@ -1,6 +1,15 @@
 [role="xpack"]
 [[security-api]]
 == Security APIs
+
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 To use the security APIs, you must set `xpack.security.enabled` to `true` in
 the `elasticsearch.yml` file.
 

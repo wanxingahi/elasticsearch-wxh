@@ -2,6 +2,14 @@
 [[snapshot-lifecycle-management-api]]
 == {slm-cap} APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 You use the following APIs to set up policies to automatically take snapshots and 
 control how long they are retained.
 

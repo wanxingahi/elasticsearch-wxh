@@ -2,6 +2,14 @@
 [[ccr-apis]]
 == {ccr-cap} APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 You can use the following APIs to perform <<xpack-ccr,{ccr}>> operations.
 
 [discrete]

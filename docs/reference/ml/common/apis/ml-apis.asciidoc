@@ -2,6 +2,14 @@
 [[ml-apis]]
 = {ml-cap} APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 You can use the following APIs to retrieve information related to the
 {stack-ml-features}:
 

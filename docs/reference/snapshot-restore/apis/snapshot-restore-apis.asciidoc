@@ -1,6 +1,14 @@
 [[snapshot-restore-apis]]
 == Snapshot and restore APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 You can use the following APIs to set up snapshot repositories, manage snapshot
 backups, and restore snapshots to a running cluster.
 

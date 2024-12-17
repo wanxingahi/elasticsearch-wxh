@@ -2,6 +2,14 @@
 [[sql-apis]]
 == SQL APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 {es}'s SQL APIs let you run SQL queries on {es} indices and data streams.
 For an overview of {es}'s SQL features and related tutorials, see <<xpack-sql>>.
 

@@ -2,6 +2,14 @@
 [[fleet-apis]]
 == Fleet APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 TIP: For the {kib} {fleet} APIs, see the
 {fleet-guide}/fleet-api-docs.html[Fleet API Documentation].
 

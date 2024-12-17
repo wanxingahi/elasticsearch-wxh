@@ -2,6 +2,14 @@
 [[migration-api]]
 == Migration APIs
 
+////
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+--
+////
+
 The migration APIs power {kib}'s **Upgrade Assistant** feature.
 
 include::apis/shared-migration-apis-tip.asciidoc[]
