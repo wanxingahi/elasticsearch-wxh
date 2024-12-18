@@ -8,9 +8,7 @@ directly to configure and access {es} features.
 
 .New API Reference
 [sidebar]
---
 For the most up-to-date API details, refer to {api-es}[{es} APIs].
---
 
 * <<api-conventions, API conventions>>
 * <<common-options, Common Options>>
