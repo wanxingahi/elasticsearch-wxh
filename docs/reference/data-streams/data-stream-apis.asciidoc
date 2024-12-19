@@ -2,13 +2,11 @@
 [[data-stream-apis]]
 == Data stream APIs
 
-////
 .New API Reference
 [sidebar]
 --
-For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+For the most up-to-date API details, refer to {api-es}/group/endpoint-data-stream[data stream APIs].
 --
-////
 
 The following APIs are available for managing <<data-streams,data streams>>:
 
