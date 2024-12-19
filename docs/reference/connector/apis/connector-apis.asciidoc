@@ -1,13 +1,11 @@
 [[connector-apis]]
 == Connector APIs
 
-////
 .New API Reference
 [sidebar]
 --
-For the most up-to-date API details, refer to {api-es}/group/endpoint-autoscaling[behavioral analytics APIs].
+For the most up-to-date API details, refer to {api-es}/group/endpoint-connector[connector APIs].
 --
-////
 
 beta::[]
 
