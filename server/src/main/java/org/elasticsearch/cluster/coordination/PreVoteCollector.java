@@ -49,13 +49,11 @@ public class PreVoteCollector {
     // Tuple for simple atomic updates. null until the first call to `update()`.
     private volatile Tuple<DiscoveryNode, PreVoteResponse> state; // DiscoveryNode component is null if there is currently no known leader.
 
-    PreVoteCollector(
-        final TransportService transportService,
-        final Runnable startElection,
-        final LongConsumer updateMaxTermSeen,
-        final ElectionStrategy electionStrategy,
-        NodeHealthService nodeHealthService
-    ) {
+    PreVoteCollector(final TransportService transportService,
+                     final Runnable startElection,
+                     final LongConsumer updateMaxTermSeen,
+                     final ElectionStrategy electionStrategy,
+                     NodeHealthService nodeHealthService) {
         this.transportService = transportService;
         this.startElection = startElection;
         this.updateMaxTermSeen = updateMaxTermSeen;
@@ -198,7 +196,7 @@ public class PreVoteCollector {
 
             if (response.getLastAcceptedTerm() > clusterState.term()
                 || (response.getLastAcceptedTerm() == clusterState.term()
-                    && response.getLastAcceptedVersion() > clusterState.getVersionOrMetadataVersion())) {
+                && response.getLastAcceptedVersion() > clusterState.getVersionOrMetadataVersion())) {
                 logger.debug("{} ignoring {} from {} as it is fresher", this, response, sender);
                 return;
             }

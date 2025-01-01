@@ -747,6 +747,7 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
             followersChecker.updateFastResponseState(getCurrentTerm(), mode);
             lagDetector.clearTrackedNodes();
 
+            // 如果之前是leader，清除master相关信息
             if (prevMode == Mode.LEADER) {
                 cleanMasterService();
             }
@@ -852,6 +853,7 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
     }
 
     private PreVoteResponse getPreVoteResponse() {
+        //记录当前Term、上一次接受的Term和上一次接受的版本
         return new PreVoteResponse(
             getCurrentTerm(),
             coordinationState.get().getLastAcceptedTerm(),
@@ -937,8 +939,10 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
     @Override
     public void startInitialJoin() {
         synchronized (mutex) {
+            // 先转为候选者
             becomeCandidate("startInitialJoin");
         }
+        // 启动选举任务
         clusterBootstrapService.scheduleUnconfiguredBootstrap();
     }
 

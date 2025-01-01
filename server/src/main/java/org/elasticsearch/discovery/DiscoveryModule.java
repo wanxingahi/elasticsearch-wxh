@@ -95,24 +95,22 @@ public class DiscoveryModule {
 
     private final Discovery discovery;
 
-    public DiscoveryModule(
-        Settings settings,
-        ThreadPool threadPool,
-        BigArrays bigArrays,
-        TransportService transportService,
-        Client client,
-        NamedWriteableRegistry namedWriteableRegistry,
-        NetworkService networkService,
-        MasterService masterService,
-        ClusterApplier clusterApplier,
-        ClusterSettings clusterSettings,
-        List<DiscoveryPlugin> plugins,
-        AllocationService allocationService,
-        Path configFile,
-        GatewayMetaState gatewayMetaState,
-        RerouteService rerouteService,
-        NodeHealthService nodeHealthService
-    ) {
+    public DiscoveryModule(Settings settings,
+                           ThreadPool threadPool,
+                           BigArrays bigArrays,
+                           TransportService transportService,
+                           Client client,
+                           NamedWriteableRegistry namedWriteableRegistry,
+                           NetworkService networkService,
+                           MasterService masterService,
+                           ClusterApplier clusterApplier,
+                           ClusterSettings clusterSettings,
+                           List<DiscoveryPlugin> plugins,
+                           AllocationService allocationService,
+                           Path configFile,
+                           GatewayMetaState gatewayMetaState,
+                           RerouteService rerouteService,
+                           NodeHealthService nodeHealthService) {
         final Collection<BiConsumer<DiscoveryNode, ClusterState>> joinValidators = new ArrayList<>();
         final Map<String, Supplier<SeedHostsProvider>> hostProviders = new HashMap<>();
         hostProviders.put("settings", () -> new SettingsBasedSeedHostsProvider(settings, transportService));

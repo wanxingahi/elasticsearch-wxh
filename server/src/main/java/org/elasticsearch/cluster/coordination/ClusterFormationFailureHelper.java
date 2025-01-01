@@ -52,12 +52,10 @@ public class ClusterFormationFailureHelper {
     @Nullable // if no warning is scheduled
     private volatile WarningScheduler warningScheduler;
 
-    public ClusterFormationFailureHelper(
-        Settings settings,
-        Supplier<ClusterFormationState> clusterFormationStateSupplier,
-        ThreadPool threadPool,
-        Runnable logLastFailedJoinAttempt
-    ) {
+    public ClusterFormationFailureHelper(Settings settings,
+                                         Supplier<ClusterFormationState> clusterFormationStateSupplier,
+                                         ThreadPool threadPool,
+                                         Runnable logLastFailedJoinAttempt) {
         this.clusterFormationStateSupplier = clusterFormationStateSupplier;
         this.threadPool = threadPool;
         this.clusterFormationWarningTimeout = DISCOVERY_CLUSTER_FORMATION_WARNING_TIMEOUT_SETTING.get(settings);

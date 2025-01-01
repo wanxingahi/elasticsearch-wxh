@@ -158,12 +158,18 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
     private final TimeValue pingTimeout;
     private final TimeValue joinTimeout;
 
-    /** how many retry attempts to perform if join request failed with an retryable error */
+    /**
+     * how many retry attempts to perform if join request failed with an retryable error
+     */
     private final int joinRetryAttempts;
-    /** how long to wait before performing another join attempt after a join request failed with an retryable error */
+    /**
+     * how long to wait before performing another join attempt after a join request failed with an retryable error
+     */
     private final TimeValue joinRetryDelay;
 
-    /** how many pings from *another* master to tolerate before forcing a rejoin on other or local master */
+    /**
+     * how many pings from *another* master to tolerate before forcing a rejoin on other or local master
+     */
     private final int maxPingsFromAnotherMaster;
 
     // a flag that should be used only for testing
@@ -185,19 +191,17 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
     private final Object stateMutex = new Object();
     private final Collection<BiConsumer<DiscoveryNode, ClusterState>> onJoinValidators;
 
-    public ZenDiscovery(
-        Settings settings,
-        ThreadPool threadPool,
-        TransportService transportService,
-        NamedWriteableRegistry namedWriteableRegistry,
-        MasterService masterService,
-        ClusterApplier clusterApplier,
-        ClusterSettings clusterSettings,
-        SeedHostsProvider hostsProvider,
-        AllocationService allocationService,
-        Collection<BiConsumer<DiscoveryNode, ClusterState>> onJoinValidators,
-        RerouteService rerouteService
-    ) {
+    public ZenDiscovery(Settings settings,
+                        ThreadPool threadPool,
+                        TransportService transportService,
+                        NamedWriteableRegistry namedWriteableRegistry,
+                        MasterService masterService,
+                        ClusterApplier clusterApplier,
+                        ClusterSettings clusterSettings,
+                        SeedHostsProvider hostsProvider,
+                        AllocationService allocationService,
+                        Collection<BiConsumer<DiscoveryNode, ClusterState>> onJoinValidators,
+                        RerouteService rerouteService) {
         this.onJoinValidators = JoinTaskExecutor.addBuiltInJoinValidators(onJoinValidators);
         this.masterService = masterService;
         this.clusterApplier = clusterApplier;
@@ -297,9 +301,13 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
             assert committedState.get() == null;
             assert localNode != null;
             ClusterState.Builder builder = ClusterState.builder(clusterName);
-            ClusterState initialState = builder.blocks(
-                ClusterBlocks.builder().addGlobalBlock(STATE_NOT_RECOVERED_BLOCK).addGlobalBlock(noMasterBlockService.getNoMasterBlock())
-            ).nodes(DiscoveryNodes.builder().add(localNode).localNodeId(localNode.getId())).build();
+            ClusterState initialState = builder
+                .blocks(ClusterBlocks.builder()
+                    .addGlobalBlock(STATE_NOT_RECOVERED_BLOCK)
+                    .addGlobalBlock(noMasterBlockService.getNoMasterBlock())
+                )
+                .nodes(DiscoveryNodes.builder().add(localNode).localNodeId(localNode.getId()))
+                .build();
             committedState.set(initialState);
             clusterApplier.setInitialState(initialState);
             nodesFD.setLocalNode(localNode);
@@ -842,7 +850,7 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
         // reject cluster states that are not new from the same master
         if (currentState.supersedes(newClusterState)
             || (newClusterState.nodes().getMasterNodeId().equals(currentState.nodes().getMasterNodeId())
-                && currentState.version() == newClusterState.version())) {
+            && currentState.version() == newClusterState.version())) {
             // if the new state has a smaller version, and it has the same master node, then no need to process it
             logger.debug(
                 "received a cluster state that is not newer than the current one, ignoring (received {}, current {})",
@@ -1034,8 +1042,9 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
             clusterState = ClusterState.builder(clusterState).blocks(clusterBlocks).nodes(discoveryNodes).build();
 
             committedState.set(clusterState);
-            clusterApplier.onNewClusterState(reason, this::clusterState, ActionListener.wrap(() -> {})); // don't wait for state to be
-                                                                                                         // applied
+            clusterApplier.onNewClusterState(reason, this::clusterState, ActionListener.wrap(() -> {
+            })); // don't wait for state to be
+            // applied
         }
     }
 
@@ -1274,25 +1283,33 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
         private final AtomicBoolean running = new AtomicBoolean(false);
         private final AtomicReference<Thread> currentJoinThread = new AtomicReference<>();
 
-        /** returns true if join thread control is started and there is currently an active join thread */
+        /**
+         * returns true if join thread control is started and there is currently an active join thread
+         */
         public boolean joinThreadActive() {
             Thread currentThread = currentJoinThread.get();
             return running.get() && currentThread != null && currentThread.isAlive();
         }
 
-        /** returns true if join thread control is started and the supplied thread is the currently active joinThread */
+        /**
+         * returns true if join thread control is started and the supplied thread is the currently active joinThread
+         */
         public boolean joinThreadActive(Thread joinThread) {
             return running.get() && joinThread.equals(currentJoinThread.get());
         }
 
-        /** cleans any running joining thread and calls {@link #rejoin} */
+        /**
+         * cleans any running joining thread and calls {@link #rejoin}
+         */
         public void stopRunningThreadAndRejoin(String reason) {
             assert Thread.holdsLock(stateMutex);
             currentJoinThread.set(null);
             rejoin(reason);
         }
 
-        /** starts a new joining thread if there is no currently active one and join thread controlling is started */
+        /**
+         * starts a new joining thread if there is no currently active one and join thread controlling is started
+         */
         public void startNewThreadIfNotRunning() {
             assert Thread.holdsLock(stateMutex);
             if (joinThreadActive()) {
@@ -1334,7 +1351,9 @@ public class ZenDiscovery extends AbstractLifecycleComponent implements Discover
             startNewThreadIfNotRunning();
         }
 
-        /** marks the given joinThread as completed. Returns false if the supplied thread is not the currently active join thread */
+        /**
+         * marks the given joinThread as completed. Returns false if the supplied thread is not the currently active join thread
+         */
         public boolean markThreadAsDone(Thread joinThread) {
             assert Thread.holdsLock(stateMutex);
             return currentJoinThread.compareAndSet(joinThread, null);
