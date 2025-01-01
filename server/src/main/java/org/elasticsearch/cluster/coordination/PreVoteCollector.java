@@ -151,6 +151,7 @@ public class PreVoteCollector {
         void start(final Iterable<DiscoveryNode> broadcastNodes) {
             assert StreamSupport.stream(broadcastNodes.spliterator(), false).noneMatch(Coordinator::isZen1Node) : broadcastNodes;
             logger.debug("{} requesting pre-votes from {}", this, broadcastNodes);
+            // 遍历发现的节点，当前节点向每一个节点发送投票请求
             broadcastNodes.forEach(
                 n -> transportService.sendRequest(
                     n,
