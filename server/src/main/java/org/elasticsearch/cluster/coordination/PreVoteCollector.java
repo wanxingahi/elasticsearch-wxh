@@ -100,12 +100,15 @@ public class PreVoteCollector {
     }
 
     private PreVoteResponse handlePreVoteRequest(final PreVoteRequest request) {
+        // 比较Term，更新maxTermSeen
         updateMaxTermSeen.accept(request.getCurrentTerm());
 
         Tuple<DiscoveryNode, PreVoteResponse> state = this.state;
         assert state != null : "received pre-vote request before fully initialised";
 
+        // 获取当前节点记录的集群Leader节点
         final DiscoveryNode leader = state.v1();
+        // 获取当前节点的Term信息
         final PreVoteResponse response = state.v2();
 
         final StatusInfo statusInfo = nodeHealthService.getHealth();
@@ -115,10 +118,12 @@ public class PreVoteCollector {
             throw new NodeHealthCheckFailureException(message);
         }
 
+        // 如果leader为空，表示还没有Leader节点，返回响应同意发起投票的节点成为leader
         if (leader == null) {
             return response;
         }
 
+        // 如果leader不为空，但是与发起请求的节点是同一个节点，同样支持发起请求的节点成为leader
         if (leader.equals(request.getSourceNode())) {
             // This is a _rare_ case where our leader has detected a failure and stepped down, but we are still a follower. It's possible
             // that the leader lost its quorum, but while we're still a follower we will not offer joins to any other node so there is no
@@ -128,6 +133,7 @@ public class PreVoteCollector {
             return response;
         }
 
+        // 其他情况，表示已经存在leader，拒绝投票请求
         throw new CoordinationStateRejectedException("rejecting " + request + " as there is already a leader");
     }
 
@@ -195,6 +201,7 @@ public class PreVoteCollector {
 
             updateMaxTermSeen.accept(response.getCurrentTerm());
 
+            // 如果响应中的Term大于当前节点的Term， 或者Term相等但是版本号大于当前节点的版本号
             if (response.getLastAcceptedTerm() > clusterState.term()
                 || (response.getLastAcceptedTerm() == clusterState.term()
                 && response.getLastAcceptedVersion() > clusterState.getVersionOrMetadataVersion())) {
@@ -221,6 +228,7 @@ public class PreVoteCollector {
                 )
             );
 
+            // 判断是否得到了大多数投票
             if (electionStrategy.isElectionQuorum(
                 clusterState.nodes().getLocalNode(),
                 localPreVoteResponse.getCurrentTerm(),
@@ -240,6 +248,7 @@ public class PreVoteCollector {
             }
 
             logger.debug("{} added {} from {}, starting election", this, response, sender);
+            // 开始选举
             startElection.run();
         }
 

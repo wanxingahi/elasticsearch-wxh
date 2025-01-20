@@ -171,15 +171,10 @@ public class CoordinationState {
      * @throws CoordinationStateRejectedException if the arguments were incompatible with the current state of this object.
      */
     public Join handleStartJoin(StartJoinRequest startJoinRequest) {
+        // 如果StartJoin请求中的Term小于或者等于当前节点的Term，抛出异常
         if (startJoinRequest.getTerm() <= getCurrentTerm()) {
-            logger.debug(
-                "handleStartJoin: ignoring [{}] as term provided is not greater than current term [{}]",
-                startJoinRequest,
-                getCurrentTerm()
-            );
-            throw new CoordinationStateRejectedException(
-                "incoming term " + startJoinRequest.getTerm() + " not greater than current term " + getCurrentTerm()
-            );
+            logger.debug("handleStartJoin: ignoring [{}] as term provided is not greater than current term [{}]", startJoinRequest, getCurrentTerm());
+            throw new CoordinationStateRejectedException("incoming term " + startJoinRequest.getTerm() + " not greater than current term " + getCurrentTerm());
         }
 
         logger.debug("handleStartJoin: leaving term [{}] due to {}", getCurrentTerm(), startJoinRequest);
@@ -205,6 +200,7 @@ public class CoordinationState {
         joinVotes = new VoteCollection();
         publishVotes = new VoteCollection();
 
+        // 返回JOIN信息，包括当前节点、发送startJoin请求的节点、当前节点的Term、当前节点上一次接受的Term、当前节点上一次接受的版本
         return new Join(
             localNode,
             startJoinRequest.getSourceNode(),

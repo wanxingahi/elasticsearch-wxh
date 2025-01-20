@@ -469,6 +469,7 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
 
     private void updateMaxTermSeen(final long term) {
         synchronized (mutex) {
+            // 当前节点收到过的最大的Term与请求中的term，如果请求中的Term较大，maxTermSeen的值将被更新为请求中的Term的值
             maxTermSeen = Math.max(maxTermSeen, term);
             final long currentTerm = getCurrentTerm();
             if (mode == Mode.LEADER && maxTermSeen > currentTerm) {
@@ -479,7 +480,9 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
                 } else {
                     try {
                         logger.debug("updateMaxTermSeen: maxTermSeen = {} > currentTerm = {}, bumping term", maxTermSeen, currentTerm);
+                        // 确保Term是最新
                         ensureTermAtLeast(getLocalNode(), maxTermSeen);
+                        // 发起选举
                         startElection();
                     } catch (Exception e) {
                         logger.warn(new ParameterizedMessage("failed to bump term to {}", maxTermSeen), e);
@@ -502,6 +505,7 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
 
                 final StartJoinRequest startJoinRequest = new StartJoinRequest(getLocalNode(), Math.max(getCurrentTerm(), maxTermSeen) + 1);
                 logger.debug("starting election with {}", startJoinRequest);
+                // 调用sendStartJoinRequest发送StartJoin请求
                 getDiscoveredNodes().forEach(node -> {
                     if (isZen1Node(node) == false) {
                         joinHelper.sendStartJoinRequest(startJoinRequest, node);
@@ -572,13 +576,7 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
 
         if (singleNodeDiscovery && joinRequest.getSourceNode().equals(getLocalNode()) == false) {
             joinListener.onFailure(
-                new IllegalStateException(
-                    "cannot join node with ["
-                        + DiscoveryModule.DISCOVERY_TYPE_SETTING.getKey()
-                        + "] set to ["
-                        + DiscoveryModule.SINGLE_NODE_DISCOVERY_TYPE
-                        + "] discovery"
-                )
+                new IllegalStateException("cannot join node with [" + DiscoveryModule.DISCOVERY_TYPE_SETTING.getKey() + "] set to [" + DiscoveryModule.SINGLE_NODE_DISCOVERY_TYPE + "] discovery")
             );
             return;
         }
@@ -586,10 +584,11 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
         transportService.connectToNode(joinRequest.getSourceNode(), ActionListener.wrap(connectionReference -> {
             boolean retainConnection = false;
             try {
+                // 对JOIN请求进行验证
                 validateJoinRequest(
                     joinRequest,
                     ActionListener.runBefore(joinListener, () -> Releasables.close(connectionReference))
-                        .delegateFailure((l, ignored) -> processJoinRequest(joinRequest, l))
+                        .delegateFailure((l, ignored) -> processJoinRequest(joinRequest, l))// 处理请求
                 );
                 retainConnection = true;
             } finally {
@@ -697,14 +696,17 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
         final Optional<Join> optionalJoin = joinRequest.getOptionalJoin();
         try {
             synchronized (mutex) {
+                // 更新最大Term
                 updateMaxTermSeen(joinRequest.getTerm());
 
                 final CoordinationState coordState = coordinationState.get();
+                // 获取上一次的状态，是否成功选举为Leader
                 final boolean prevElectionWon = coordState.electionWon();
 
                 optionalJoin.ifPresent(this::handleJoin);
                 joinAccumulator.handleJoinRequest(joinRequest.getSourceNode(), joinListener);
 
+                // 如果之前未成为Leader并且当前选举Leader成功
                 if (prevElectionWon == false && coordState.electionWon()) {
                     becomeLeader("handleJoinRequest");
                 }
@@ -1226,8 +1228,10 @@ public class Coordinator extends AbstractLifecycleComponent implements Discovery
 
     private void handleJoin(Join join) {
         synchronized (mutex) {
+            // 确保Term最新，如果不是最新，会返回一个JOIN对象，调用handleJoin进行处理，这里可以理解为节点给自己投了一票
             ensureTermAtLeast(getLocalNode(), join.getTerm()).ifPresent(this::handleJoin);
 
+            // 如果已经被选举为Leader
             if (coordinationState.get().electionWon()) {
                 // If we have already won the election then the actual join does not matter for election purposes, so swallow any exception
                 final boolean isNewJoinFromMasterEligibleNode = handleJoinIgnoringExceptions(join);
