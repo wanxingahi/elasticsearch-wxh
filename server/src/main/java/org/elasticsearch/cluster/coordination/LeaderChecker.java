@@ -97,12 +97,10 @@ public class LeaderChecker {
 
     private volatile DiscoveryNodes discoveryNodes;
 
-    LeaderChecker(
-        final Settings settings,
-        final TransportService transportService,
-        final LeaderFailureListener leaderFailureListener,
-        final NodeHealthService nodeHealthService
-    ) {
+    LeaderChecker(final Settings settings,
+                  final TransportService transportService,
+                  final LeaderFailureListener leaderFailureListener,
+                  final NodeHealthService nodeHealthService) {
         this.settings = settings;
         leaderCheckInterval = LEADER_CHECK_INTERVAL_SETTING.get(settings);
         leaderCheckTimeout = LEADER_CHECK_TIMEOUT_SETTING.get(settings);

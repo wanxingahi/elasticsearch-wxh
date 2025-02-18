@@ -104,13 +104,11 @@ public class FollowersChecker {
     private final NodeHealthService nodeHealthService;
     private volatile FastResponseState fastResponseState;
 
-    public FollowersChecker(
-        Settings settings,
-        TransportService transportService,
-        Consumer<FollowerCheckRequest> handleRequestAndUpdateState,
-        BiConsumer<DiscoveryNode, String> onNodeFailure,
-        NodeHealthService nodeHealthService
-    ) {
+    public FollowersChecker(Settings settings,
+                            TransportService transportService,
+                            Consumer<FollowerCheckRequest> handleRequestAndUpdateState,
+                            BiConsumer<DiscoveryNode, String> onNodeFailure,
+                            NodeHealthService nodeHealthService) {
         this.settings = settings;
         this.transportService = transportService;
         this.handleRequestAndUpdateState = handleRequestAndUpdateState;
@@ -137,7 +135,7 @@ public class FollowersChecker {
             false,
             NodesFaultDetection.PingRequest::new,
             (request, channel, task) -> // TODO: check that we're a follower of the requesting node?
-            channel.sendResponse(new NodesFaultDetection.PingResponse())
+                channel.sendResponse(new NodesFaultDetection.PingResponse())
         );
         transportService.addConnectionListener(new TransportConnectionListener() {
             @Override
@@ -189,10 +187,7 @@ public class FollowersChecker {
     private void handleFollowerCheck(FollowerCheckRequest request, TransportChannel transportChannel) throws IOException {
         final StatusInfo statusInfo = nodeHealthService.getHealth();
         if (statusInfo.getStatus() == UNHEALTHY) {
-            final String message = "handleFollowerCheck: node is unhealthy ["
-                + statusInfo.getInfo()
-                + "], rejecting "
-                + statusInfo.getInfo();
+            final String message = "handleFollowerCheck: node is unhealthy [" + statusInfo.getInfo() + "], rejecting " + statusInfo.getInfo();
             logger.debug(message);
             throw new NodeHealthCheckFailureException(message);
         }
