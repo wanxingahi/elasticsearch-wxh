@@ -70,7 +70,9 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
-/** Performs shard-level bulk (index, delete or update) operations */
+/**
+ * Performs shard-level bulk (index, delete or update) operations
+ */
 public class TransportShardBulkAction extends TransportWriteAction<BulkShardRequest, BulkShardRequest, BulkShardResponse> {
 
     public static final String ACTION_NAME = BulkAction.NAME + "[s]";
@@ -81,19 +83,17 @@ public class TransportShardBulkAction extends TransportWriteAction<BulkShardRequ
     private final MappingUpdatedAction mappingUpdatedAction;
 
     @Inject
-    public TransportShardBulkAction(
-        Settings settings,
-        TransportService transportService,
-        ClusterService clusterService,
-        IndicesService indicesService,
-        ThreadPool threadPool,
-        ShardStateAction shardStateAction,
-        MappingUpdatedAction mappingUpdatedAction,
-        UpdateHelper updateHelper,
-        ActionFilters actionFilters,
-        IndexingPressure indexingPressure,
-        SystemIndices systemIndices
-    ) {
+    public TransportShardBulkAction(Settings settings,
+                                    TransportService transportService,
+                                    ClusterService clusterService,
+                                    IndicesService indicesService,
+                                    ThreadPool threadPool,
+                                    ShardStateAction shardStateAction,
+                                    MappingUpdatedAction mappingUpdatedAction,
+                                    UpdateHelper updateHelper,
+                                    ActionFilters actionFilters,
+                                    IndexingPressure indexingPressure,
+                                    SystemIndices systemIndices) {
         super(
             settings,
             ACTION_NAME,
@@ -125,32 +125,40 @@ public class TransportShardBulkAction extends TransportWriteAction<BulkShardRequ
     }
 
     @Override
-    protected void dispatchedShardOperationOnPrimary(
-        BulkShardRequest request,
-        IndexShard primary,
-        ActionListener<PrimaryResult<BulkShardRequest, BulkShardResponse>> listener
-    ) {
+    protected void dispatchedShardOperationOnPrimary(BulkShardRequest request,
+                                                     IndexShard primary,
+                                                     ActionListener<PrimaryResult<BulkShardRequest, BulkShardResponse>> listener) {
         ClusterStateObserver observer = new ClusterStateObserver(clusterService, request.timeout(), logger, threadPool.getThreadContext());
-        performOnPrimary(request, primary, updateHelper, threadPool::absoluteTimeInMillis, (update, shardId, type, mappingListener) -> {
-            assert update != null;
-            assert shardId != null;
-            mappingUpdatedAction.updateMappingOnMaster(shardId.getIndex(), type, update, mappingListener);
-        }, mappingUpdateListener -> observer.waitForNextChange(new ClusterStateObserver.Listener() {
-            @Override
-            public void onNewClusterState(ClusterState state) {
-                mappingUpdateListener.onResponse(null);
-            }
+        performOnPrimary(
+            request,
+            primary,
+            updateHelper,
+            threadPool::absoluteTimeInMillis,
+            (update, shardId, type, mappingListener) -> {
+                assert update != null;
+                assert shardId != null;
+                mappingUpdatedAction.updateMappingOnMaster(shardId.getIndex(), type, update, mappingListener);
+            },
+            mappingUpdateListener -> observer.waitForNextChange(new ClusterStateObserver.Listener() {
+                @Override
+                public void onNewClusterState(ClusterState state) {
+                    mappingUpdateListener.onResponse(null);
+                }
 
-            @Override
-            public void onClusterServiceClose() {
-                mappingUpdateListener.onFailure(new NodeClosedException(clusterService.localNode()));
-            }
+                @Override
+                public void onClusterServiceClose() {
+                    mappingUpdateListener.onFailure(new NodeClosedException(clusterService.localNode()));
+                }
 
-            @Override
-            public void onTimeout(TimeValue timeout) {
-                mappingUpdateListener.onFailure(new MapperException("timed out while waiting for a dynamic mapping update"));
-            }
-        }), listener, threadPool, executor(primary));
+                @Override
+                public void onTimeout(TimeValue timeout) {
+                    mappingUpdateListener.onFailure(new MapperException("timed out while waiting for a dynamic mapping update"));
+                }
+            }),
+            listener,
+            threadPool,
+            executor(primary)
+        );
     }
 
     @Override
@@ -158,17 +166,15 @@ public class TransportShardBulkAction extends TransportWriteAction<BulkShardRequ
         return request.ramBytesUsed();
     }
 
-    public static void performOnPrimary(
-        BulkShardRequest request,
-        IndexShard primary,
-        UpdateHelper updateHelper,
-        LongSupplier nowInMillisSupplier,
-        MappingUpdatePerformer mappingUpdater,
-        Consumer<ActionListener<Void>> waitForMappingUpdate,
-        ActionListener<PrimaryResult<BulkShardRequest, BulkShardResponse>> listener,
-        ThreadPool threadPool,
-        String executorName
-    ) {
+    public static void performOnPrimary(BulkShardRequest request,
+                                        IndexShard primary,
+                                        UpdateHelper updateHelper,
+                                        LongSupplier nowInMillisSupplier,
+                                        MappingUpdatePerformer mappingUpdater,
+                                        Consumer<ActionListener<Void>> waitForMappingUpdate,
+                                        ActionListener<PrimaryResult<BulkShardRequest, BulkShardResponse>> listener,
+                                        ThreadPool threadPool,
+                                        String executorName) {
         new ActionRunnable<PrimaryResult<BulkShardRequest, BulkShardResponse>>(listener) {
 
             private final Executor executor = threadPool.executor(executorName);
@@ -247,17 +253,16 @@ public class TransportShardBulkAction extends TransportWriteAction<BulkShardRequ
 
     /**
      * Executes bulk item requests and handles request execution exceptions.
+     *
      * @return {@code true} if request completed on this thread and the listener was invoked, {@code false} if the request triggered
-     *                      a mapping update that will finish and invoke the listener on a different thread
+     * a mapping update that will finish and invoke the listener on a different thread
      */
-    static boolean executeBulkItemRequest(
-        BulkPrimaryExecutionContext context,
-        UpdateHelper updateHelper,
-        LongSupplier nowInMillisSupplier,
-        MappingUpdatePerformer mappingUpdater,
-        Consumer<ActionListener<Void>> waitForMappingUpdate,
-        ActionListener<Void> itemDoneListener
-    ) throws Exception {
+    static boolean executeBulkItemRequest(BulkPrimaryExecutionContext context,
+                                          UpdateHelper updateHelper,
+                                          LongSupplier nowInMillisSupplier,
+                                          MappingUpdatePerformer mappingUpdater,
+                                          Consumer<ActionListener<Void>> waitForMappingUpdate,
+                                          ActionListener<Void> itemDoneListener) throws Exception {
         final DocWriteRequest.OpType opType = context.getCurrent().opType();
 
         final UpdateHelper.Result updateResult;

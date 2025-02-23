@@ -41,24 +41,20 @@ public abstract class RetryableAction<Response> {
 
     private volatile Scheduler.ScheduledCancellable retryTask;
 
-    public RetryableAction(
-        Logger logger,
-        ThreadPool threadPool,
-        TimeValue initialDelay,
-        TimeValue timeoutValue,
-        ActionListener<Response> listener
-    ) {
+    public RetryableAction(Logger logger,
+                           ThreadPool threadPool,
+                           TimeValue initialDelay,
+                           TimeValue timeoutValue,
+                           ActionListener<Response> listener) {
         this(logger, threadPool, initialDelay, timeoutValue, listener, ThreadPool.Names.SAME);
     }
 
-    public RetryableAction(
-        Logger logger,
-        ThreadPool threadPool,
-        TimeValue initialDelay,
-        TimeValue timeoutValue,
-        ActionListener<Response> listener,
-        String executor
-    ) {
+    public RetryableAction(Logger logger,
+                           ThreadPool threadPool,
+                           TimeValue initialDelay,
+                           TimeValue timeoutValue,
+                           ActionListener<Response> listener,
+                           String executor) {
         this.logger = logger;
         this.threadPool = threadPool;
         this.initialDelayMillis = initialDelay.getMillis();
@@ -122,7 +118,8 @@ public abstract class RetryableAction<Response> {
         return 0L;
     }
 
-    public void onFinished() {}
+    public void onFinished() {
+    }
 
     private class RetryingListener implements ActionListener<Response> {
 

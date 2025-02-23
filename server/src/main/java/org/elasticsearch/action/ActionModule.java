@@ -445,7 +445,9 @@ public class ActionModule extends AbstractModule {
     private final AutoCreateIndex autoCreateIndex;
     private final DestructiveOperations destructiveOperations;
     private final RestController restController;
-    /** Rest headers that are copied to internal requests made during a rest request. */
+    /**
+     * Rest headers that are copied to internal requests made during a rest request.
+     */
     private final Set<RestHeaderDefinition> headersToCopy;
     private final RequestValidators<PutMappingRequest> mappingRequestValidators;
     private final RequestValidators<IndicesAliasesRequest> indicesAliasesRequestRequestValidators;
@@ -564,11 +566,9 @@ public class ActionModule extends AbstractModule {
                 register(handler.getAction().name(), handler);
             }
 
-            public <Request extends ActionRequest, Response extends ActionResponse> void register(
-                ActionType<Response> action,
-                Class<? extends TransportAction<Request, Response>> transportAction,
-                Class<?>... supportTransportActions
-            ) {
+            public <Request extends ActionRequest, Response extends ActionResponse> void register(ActionType<Response> action,
+                                                                                                  Class<? extends TransportAction<Request, Response>> transportAction,
+                                                                                                  Class<?>... supportTransportActions) {
                 register(new ActionHandler<>(action, transportAction, supportTransportActions));
             }
         }

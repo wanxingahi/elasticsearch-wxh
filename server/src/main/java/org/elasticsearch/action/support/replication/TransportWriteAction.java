@@ -47,10 +47,8 @@ import java.util.function.BiFunction;
  * Base class for transport actions that modify data in some shard like index, delete, and shardBulk.
  * Allows performing async actions (e.g. refresh) after performing write operations on primary and replica shards
  */
-public abstract class TransportWriteAction<
-    Request extends ReplicatedWriteRequest<Request>,
-    ReplicaRequest extends ReplicatedWriteRequest<ReplicaRequest>,
-    Response extends ReplicationResponse & WriteResponse> extends TransportReplicationAction<Request, ReplicaRequest, Response> {
+public abstract class TransportWriteAction<Request extends ReplicatedWriteRequest<Request>, ReplicaRequest extends ReplicatedWriteRequest<ReplicaRequest>, Response extends ReplicationResponse & WriteResponse>
+    extends TransportReplicationAction<Request, ReplicaRequest, Response> {
 
     protected final IndexingPressure indexingPressure;
     protected final SystemIndices systemIndices;
@@ -58,22 +56,20 @@ public abstract class TransportWriteAction<
 
     private final BiFunction<ExecutorSelector, IndexShard, String> executorFunction;
 
-    protected TransportWriteAction(
-        Settings settings,
-        String actionName,
-        TransportService transportService,
-        ClusterService clusterService,
-        IndicesService indicesService,
-        ThreadPool threadPool,
-        ShardStateAction shardStateAction,
-        ActionFilters actionFilters,
-        Writeable.Reader<Request> request,
-        Writeable.Reader<ReplicaRequest> replicaRequest,
-        BiFunction<ExecutorSelector, IndexShard, String> executorFunction,
-        boolean forceExecutionOnPrimary,
-        IndexingPressure indexingPressure,
-        SystemIndices systemIndices
-    ) {
+    protected TransportWriteAction(Settings settings,
+                                   String actionName,
+                                   TransportService transportService,
+                                   ClusterService clusterService,
+                                   IndicesService indicesService,
+                                   ThreadPool threadPool,
+                                   ShardStateAction shardStateAction,
+                                   ActionFilters actionFilters,
+                                   Writeable.Reader<Request> request,
+                                   Writeable.Reader<ReplicaRequest> replicaRequest,
+                                   BiFunction<ExecutorSelector, IndexShard, String> executorFunction,
+                                   boolean forceExecutionOnPrimary,
+                                   IndexingPressure indexingPressure,
+                                   SystemIndices systemIndices) {
         // We pass ThreadPool.Names.SAME to the super class as we control the dispatching to the
         // ThreadPool.Names.WRITE/ThreadPool.Names.SYSTEM_WRITE thread pools in this class.
         super(
@@ -123,7 +119,8 @@ public abstract class TransportWriteAction<
             if (localRerouteInitiatedByNodeClient) {
                 return indexingPressure.markPrimaryOperationLocalToCoordinatingNodeStarted(primaryOperationSize(request));
             } else {
-                return () -> {};
+                return () -> {
+                };
             }
         } else {
             // If this primary request was received directly from the network, we must mark a new primary
@@ -146,7 +143,9 @@ public abstract class TransportWriteAction<
         return 0;
     }
 
-    /** Syncs operation result to the translog or throws a shard not available failure */
+    /**
+     * Syncs operation result to the translog or throws a shard not available failure
+     */
     protected static Location syncOperationResultOrThrow(final Engine.Result operationResult, final Location currentLocation)
         throws Exception {
         final Location location;
@@ -181,14 +180,12 @@ public abstract class TransportWriteAction<
      * Called on the primary with a reference to the primary {@linkplain IndexShard} to modify.
      *
      * @param listener listener for the result of the operation on primary, including current translog location and operation response
-     * and failure async refresh is performed on the <code>primary</code> shard according to the <code>Request</code> refresh policy
+     *                 and failure async refresh is performed on the <code>primary</code> shard according to the <code>Request</code> refresh policy
      */
     @Override
-    protected void shardOperationOnPrimary(
-        Request request,
-        IndexShard primary,
-        ActionListener<PrimaryResult<ReplicaRequest, Response>> listener
-    ) {
+    protected void shardOperationOnPrimary(Request request,
+                                           IndexShard primary,
+                                           ActionListener<PrimaryResult<ReplicaRequest, Response>> listener) {
         final String executor = executorFunction.apply(executorSelector, primary);
         threadPool.executor(executor).execute(new ActionRunnable<PrimaryResult<ReplicaRequest, Response>>(listener) {
             @Override
@@ -203,18 +200,16 @@ public abstract class TransportWriteAction<
         });
     }
 
-    protected abstract void dispatchedShardOperationOnPrimary(
-        Request request,
-        IndexShard primary,
-        ActionListener<PrimaryResult<ReplicaRequest, Response>> listener
-    );
+    protected abstract void dispatchedShardOperationOnPrimary(Request request,
+                                                              IndexShard primary,
+                                                              ActionListener<PrimaryResult<ReplicaRequest, Response>> listener);
 
     /**
      * Called once per replica with a reference to the replica {@linkplain IndexShard} to modify.
      *
      * @param listener listener for the result of the operation on replica, including current translog location and operation
-     * response and failure async refresh is performed on the <code>replica</code> shard according to the <code>ReplicaRequest</code>
-     * refresh policy
+     *                 response and failure async refresh is performed on the <code>replica</code> shard according to the <code>ReplicaRequest</code>
+     *                 refresh policy
      */
     @Override
     protected void shardOperationOnReplica(ReplicaRequest request, IndexShard replica, ActionListener<ReplicaResult> listener) {
@@ -239,7 +234,7 @@ public abstract class TransportWriteAction<
 
     /**
      * Result of taking the action on the primary.
-     *
+     * <p>
      * NOTE: public for testing
      */
     public static class WritePrimaryResult<
@@ -263,11 +258,11 @@ public abstract class TransportWriteAction<
             this.logger = logger;
             assert location == null || operationFailure == null
                 : "expected either failure to be null or translog location to be null, "
-                    + "but found: ["
-                    + location
-                    + "] translog location and ["
-                    + operationFailure
-                    + "] failure";
+                + "but found: ["
+                + location
+                + "] translog location and ["
+                + operationFailure
+                + "] failure";
         }
 
         @Override
@@ -355,6 +350,7 @@ public abstract class TransportWriteAction<
     interface RespondingWriteResult {
         /**
          * Called on successful processing of all post write actions
+         *
          * @param forcedRefresh <code>true</code> iff this write has caused a refresh
          */
         void onSuccess(boolean forcedRefresh);
@@ -418,7 +414,9 @@ public abstract class TransportWriteAction<
             assert pendingOps.get() >= 0 && pendingOps.get() <= 3 : "pendingOpts was: " + pendingOps.get();
         }
 
-        /** calls the response listener if all pending operations have returned otherwise it just decrements the pending opts counter.*/
+        /**
+         * calls the response listener if all pending operations have returned otherwise it just decrements the pending opts counter.
+         */
         private void maybeFinish() {
             final int numPending = pendingOps.decrementAndGet();
             if (numPending == 0) {
@@ -464,7 +462,7 @@ public abstract class TransportWriteAction<
      * A proxy for <b>write</b> operations that need to be performed on the
      * replicas, where a failure to execute the operation should fail
      * the replica shard and/or mark the replica as stale.
-     *
+     * <p>
      * This extends {@code TransportReplicationAction.ReplicasProxy} to do the
      * failing and stale-ing.
      */

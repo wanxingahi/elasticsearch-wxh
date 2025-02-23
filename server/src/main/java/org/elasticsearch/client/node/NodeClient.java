@@ -45,12 +45,10 @@ public class NodeClient extends AbstractClient {
         super(settings, threadPool);
     }
 
-    public void initialize(
-        Map<ActionType<? extends ActionResponse>, TransportAction<? extends ActionRequest, ? extends ActionResponse>> actions,
-        Supplier<String> localNodeId,
-        RemoteClusterService remoteClusterService,
-        NamedWriteableRegistry namedWriteableRegistry
-    ) {
+    public void initialize(Map<ActionType<? extends ActionResponse>, TransportAction<? extends ActionRequest, ? extends ActionResponse>> actions,
+                           Supplier<String> localNodeId,
+                           RemoteClusterService remoteClusterService,
+                           NamedWriteableRegistry namedWriteableRegistry) {
         this.actions = actions;
         this.localNodeId = localNodeId;
         this.remoteClusterService = remoteClusterService;
@@ -63,11 +61,9 @@ public class NodeClient extends AbstractClient {
     }
 
     @Override
-    public <Request extends ActionRequest, Response extends ActionResponse> void doExecute(
-        ActionType<Response> action,
-        Request request,
-        ActionListener<Response> listener
-    ) {
+    public <Request extends ActionRequest, Response extends ActionResponse> void doExecute(ActionType<Response> action,
+                                                                                           Request request,
+                                                                                           ActionListener<Response> listener) {
         // Discard the task because the Client interface doesn't use it.
         try {
             executeLocally(action, request, listener);
@@ -87,11 +83,9 @@ public class NodeClient extends AbstractClient {
      *
      * @throws TaskCancelledException if the request's parent task has been cancelled already
      */
-    public <Request extends ActionRequest, Response extends ActionResponse> Task executeLocally(
-        ActionType<Response> action,
-        Request request,
-        ActionListener<Response> listener
-    ) {
+    public <Request extends ActionRequest, Response extends ActionResponse> Task executeLocally(ActionType<Response> action,
+                                                                                                Request request,
+                                                                                                ActionListener<Response> listener) {
         return transportAction(action).execute(request, listener);
     }
 
@@ -120,9 +114,7 @@ public class NodeClient extends AbstractClient {
     /**
      * Get the {@link TransportAction} for an {@link ActionType}, throwing exceptions if the action isn't available.
      */
-    private <Request extends ActionRequest, Response extends ActionResponse> TransportAction<Request, Response> transportAction(
-        ActionType<Response> action
-    ) {
+    private <Request extends ActionRequest, Response extends ActionResponse> TransportAction<Request, Response> transportAction(ActionType<Response> action) {
         if (actions == null) {
             throw new IllegalStateException("NodeClient has not been initialized");
         }

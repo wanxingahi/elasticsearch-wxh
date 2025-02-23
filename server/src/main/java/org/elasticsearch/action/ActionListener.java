@@ -37,14 +37,14 @@ public interface ActionListener<Response> {
     /**
      * Creates a listener that wraps this listener, mapping response values via the given mapping function and passing along
      * exceptions to this instance.
-     *
+     * <p>
      * Notice that it is considered a bug if the listener's onResponse or onFailure fails. onResponse failures will not call onFailure.
-     *
+     * <p>
      * If the function fails, the listener's onFailure handler will be called. The principle is that the mapped listener will handle
      * exceptions from the mapping function {@code fn} but it is the responsibility of {@code delegate} to handle its own exceptions
      * inside `onResponse` and `onFailure`.
      *
-     * @param fn Function to apply to listener response
+     * @param fn  Function to apply to listener response
      * @param <T> Response type of the wrapped listener
      * @return a listener that maps the received response and then passes it to this instance
      */
@@ -121,14 +121,12 @@ public interface ActionListener<Response> {
      * corresponding consumer when the response (or failure) is received.
      *
      * @param onResponse the checked consumer of the response, when the listener receives one
-     * @param onFailure the consumer of the failure, when the listener receives one
+     * @param onFailure  the consumer of the failure, when the listener receives one
      * @param <Response> the type of the response
      * @return a listener that listens for responses and invokes the consumer when received
      */
-    static <Response> ActionListener<Response> wrap(
-        CheckedConsumer<Response, ? extends Exception> onResponse,
-        Consumer<Exception> onFailure
-    ) {
+    static <Response> ActionListener<Response> wrap(CheckedConsumer<Response, ? extends Exception> onResponse,
+                                                    Consumer<Exception> onFailure) {
         return new ActionListener<Response>() {
             @Override
             public void onResponse(Response response) {
@@ -164,7 +162,7 @@ public interface ActionListener<Response> {
     /**
      * Creates a listener that delegates all exceptions it receives to another listener.
      *
-     * @param bc BiConsumer invoked with delegate listener and response
+     * @param bc  BiConsumer invoked with delegate listener and response
      * @param <T> Type of the delegating listener's response
      * @return Delegating listener
      */
@@ -229,7 +227,7 @@ public interface ActionListener<Response> {
      * Creates a listener that listens for a response (or failure) and executes the
      * corresponding runnable when the response (or failure) is received.
      *
-     * @param runnable the runnable that will be called in event of success or failure
+     * @param runnable   the runnable that will be called in event of success or failure
      * @param <Response> the type of the response
      * @return a listener that listens for responses and invokes the runnable when received
      */
@@ -267,7 +265,7 @@ public interface ActionListener<Response> {
      * Converts a listener to a {@link BiConsumer} for compatibility with the {@link java.util.concurrent.CompletableFuture}
      * api.
      *
-     * @param listener that will be wrapped
+     * @param listener   that will be wrapped
      * @param <Response> the type of the response
      * @return a bi consumer that will complete the wrapped listener
      */
@@ -426,7 +424,7 @@ public interface ActionListener<Response> {
     /**
      * Completes the given listener with the result from the provided supplier accordingly.
      * This method is mainly used to complete a listener with a block of synchronous code.
-     *
+     * <p>
      * If the supplier fails, the listener's onFailure handler will be called.
      * It is the responsibility of {@code delegate} to handle its own exceptions inside `onResponse` and `onFailure`.
      */

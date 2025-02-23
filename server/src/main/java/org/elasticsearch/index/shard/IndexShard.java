@@ -3419,12 +3419,10 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
         acquirePrimaryOperationPermit(onPermitAcquired, executorOnDelay, debugInfo, false);
     }
 
-    public void acquirePrimaryOperationPermit(
-        ActionListener<Releasable> onPermitAcquired,
-        String executorOnDelay,
-        Object debugInfo,
-        boolean forceExecution
-    ) {
+    public void acquirePrimaryOperationPermit(ActionListener<Releasable> onPermitAcquired,
+                                              String executorOnDelay,
+                                              Object debugInfo,
+                                              boolean forceExecution) {
         verifyNotClosed();
         assert shardRouting.primary() : "acquirePrimaryOperationPermit should only be called on primary shard: " + shardRouting;
 

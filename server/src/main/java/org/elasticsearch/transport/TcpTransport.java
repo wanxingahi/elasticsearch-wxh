@@ -123,15 +123,13 @@ public abstract class TcpTransport extends AbstractLifecycleComponent implements
 
     private final AtomicLong outboundConnectionCount = new AtomicLong(); // also used as a correlation ID for open/close logs
 
-    public TcpTransport(
-        Settings settings,
-        Version version,
-        ThreadPool threadPool,
-        PageCacheRecycler pageCacheRecycler,
-        CircuitBreakerService circuitBreakerService,
-        NamedWriteableRegistry namedWriteableRegistry,
-        NetworkService networkService
-    ) {
+    public TcpTransport(Settings settings,
+                        Version version,
+                        ThreadPool threadPool,
+                        PageCacheRecycler pageCacheRecycler,
+                        CircuitBreakerService circuitBreakerService,
+                        NamedWriteableRegistry namedWriteableRegistry,
+                        NetworkService networkService) {
         this.settings = settings;
         this.profileSettingsSet = getProfileSettings(settings);
         this.version = version;
@@ -282,8 +280,8 @@ public abstract class TcpTransport extends AbstractLifecycleComponent implements
             // compressed.
             final boolean shouldCompress = compress == Compression.Enabled.TRUE
                 || (compress == Compression.Enabled.INDEXING_DATA
-                    && request instanceof RawIndexingDataTransportRequest
-                    && ((RawIndexingDataTransportRequest) request).isRawIndexingData());
+                && request instanceof RawIndexingDataTransportRequest
+                && ((RawIndexingDataTransportRequest) request).isRawIndexingData());
             final Compression.Scheme schemeToUse = shouldCompress ? compressionScheme : null;
             outboundHandler.sendRequest(node, channel, requestId, action, request, options, getVersion(), schemeToUse, false);
         }
@@ -604,7 +602,8 @@ public abstract class TcpTransport extends AbstractLifecycleComponent implements
     }
 
     @Override
-    protected final void doClose() {}
+    protected final void doClose() {
+    }
 
     @Override
     protected final void doStop() {
@@ -619,7 +618,8 @@ public abstract class TcpTransport extends AbstractLifecycleComponent implements
                 String profile = entry.getKey();
                 List<TcpServerChannel> channels = entry.getValue();
                 ActionListener<Void> closeFailLogger = ActionListener.wrap(
-                    c -> {},
+                    c -> {
+                    },
                     e -> logger.warn(() -> new ParameterizedMessage("Error closing serverChannel for profile [{}]", profile), e)
                 );
                 channels.forEach(c -> c.addCloseListener(closeFailLogger));
@@ -755,10 +755,10 @@ public abstract class TcpTransport extends AbstractLifecycleComponent implements
      *
      * @param networkBytes the will be read
      * @return the length of the message
-     * @throws StreamCorruptedException              if the message header format is not recognized
-     * @throws HttpRequestOnTransportException       if the message header appears to be an HTTP message
-     * @throws IllegalArgumentException              if the message length is greater that the maximum allowed frame size.
-     *                                               This is dependent on the available memory.
+     * @throws StreamCorruptedException        if the message header format is not recognized
+     * @throws HttpRequestOnTransportException if the message header appears to be an HTTP message
+     * @throws IllegalArgumentException        if the message length is greater that the maximum allowed frame size.
+     *                                         This is dependent on the available memory.
      */
     public static int readMessageLength(BytesReference networkBytes) throws IOException {
         if (networkBytes.length() < BYTES_NEEDED_FOR_MESSAGE_SIZE) {
@@ -1019,19 +1019,19 @@ public abstract class TcpTransport extends AbstractLifecycleComponent implements
                 final TcpChannel handshakeChannel = channels.get(0);
                 try {
                     executeHandshake(node, handshakeChannel, connectionProfile, ActionListener.wrap(responseVersion -> {
-                        final long connectionId = outboundConnectionCount.incrementAndGet();
-                        logger.debug("opened transport connection [{}] to [{}] using channels [{}]", connectionId, node, channels);
-                        NodeChannels nodeChannels = new NodeChannels(node, channels, connectionProfile, responseVersion);
-                        long relativeMillisTime = threadPool.relativeTimeInMillis();
-                        nodeChannels.channels.forEach(ch -> {
-                            // Mark the channel init time
-                            ch.getChannelStats().markAccessed(relativeMillisTime);
-                            ch.addCloseListener(ActionListener.wrap(nodeChannels::close));
-                        });
-                        keepAlive.registerNodeConnection(nodeChannels.channels, connectionProfile);
-                        nodeChannels.addCloseListener(new ChannelCloseLogger(node, connectionId, relativeMillisTime));
-                        listener.onResponse(nodeChannels);
-                    },
+                            final long connectionId = outboundConnectionCount.incrementAndGet();
+                            logger.debug("opened transport connection [{}] to [{}] using channels [{}]", connectionId, node, channels);
+                            NodeChannels nodeChannels = new NodeChannels(node, channels, connectionProfile, responseVersion);
+                            long relativeMillisTime = threadPool.relativeTimeInMillis();
+                            nodeChannels.channels.forEach(ch -> {
+                                // Mark the channel init time
+                                ch.getChannelStats().markAccessed(relativeMillisTime);
+                                ch.addCloseListener(ActionListener.wrap(nodeChannels::close));
+                            });
+                            keepAlive.registerNodeConnection(nodeChannels.channels, connectionProfile);
+                            nodeChannels.addCloseListener(new ChannelCloseLogger(node, connectionId, relativeMillisTime));
+                            listener.onResponse(nodeChannels);
+                        },
                         e -> closeAndFail(
                             e instanceof ConnectTransportException
                                 ? e

@@ -182,7 +182,6 @@ final class IndexShardOperationPermits implements Closeable {
      * @param debugInfo       an extra information that can be useful when tracing an unreleased permit. When assertions are enabled
      *                        the tracing will capture the supplied object's {@link Object#toString()} value. Otherwise the object
      *                        isn't used
-     *
      */
     public void acquire(
         final ActionListener<Releasable> onAcquired,
@@ -199,13 +198,11 @@ final class IndexShardOperationPermits implements Closeable {
         acquire(onAcquired, executorOnDelay, forceExecution, debugInfo, stackTrace);
     }
 
-    private void acquire(
-        final ActionListener<Releasable> onAcquired,
-        final String executorOnDelay,
-        final boolean forceExecution,
-        final Object debugInfo,
-        final StackTraceElement[] stackTrace
-    ) {
+    private void acquire(final ActionListener<Releasable> onAcquired,
+                         final String executorOnDelay,
+                         final boolean forceExecution,
+                         final Object debugInfo,
+                         final StackTraceElement[] stackTrace) {
         if (closed) {
             onAcquired.onFailure(new IndexShardClosedException(shardId));
             return;
@@ -296,7 +293,7 @@ final class IndexShardOperationPermits implements Closeable {
 
     /**
      * @return a list of describing each permit that wasn't released yet. The description consist of the debugInfo supplied
-     *         when the permit was acquired plus a stack traces that was captured when the permit was request.
+     * when the permit was acquired plus a stack traces that was captured when the permit was request.
      */
     List<String> getActiveOperations() {
         return issuedPermits.values()

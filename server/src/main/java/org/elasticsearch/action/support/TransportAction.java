@@ -38,12 +38,10 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
     @Deprecated
     protected Logger logger = LogManager.getLogger(getClass());
 
-    protected TransportAction(
-        String actionName,
-        ActionFilters actionFilters,
-        Transport.Connection localConnection,
-        TaskManager taskManager
-    ) {
+    protected TransportAction(String actionName,
+                              ActionFilters actionFilters,
+                              Transport.Connection localConnection,
+                              TaskManager taskManager) {
         this.actionName = actionName;
         this.filters = actionFilters.filters();
         this.localConnection = localConnection;
@@ -60,7 +58,7 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
 
     /**
      * Use this method when the transport action call should result in creation of a new task associated with the call.
-     *
+     * <p>
      * This is a typical behavior.
      */
     public final Task execute(Request request, ActionListener<Response> listener) {
@@ -165,7 +163,7 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
 
     private static class RequestFilterChain<Request extends ActionRequest, Response extends ActionResponse>
         implements
-            ActionFilterChain<Request, Response> {
+        ActionFilterChain<Request, Response> {
 
         private final TransportAction<Request, Response> action;
         private final AtomicInteger index = new AtomicInteger();

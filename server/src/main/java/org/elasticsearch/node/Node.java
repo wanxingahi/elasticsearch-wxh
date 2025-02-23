@@ -242,12 +242,11 @@ public class Node implements Closeable {
     );
 
     /**
-    * controls whether the node is allowed to persist things like metadata to disk
-    * Note that this does not control whether the node stores actual indices (see
-    * {@link #NODE_DATA_SETTING}). However, if this is false, {@link #NODE_DATA_SETTING}
-    * and {@link #NODE_MASTER_SETTING} must also be false.
-    *
-    */
+     * controls whether the node is allowed to persist things like metadata to disk
+     * Note that this does not control whether the node stores actual indices (see
+     * {@link #NODE_DATA_SETTING}). However, if this is false, {@link #NODE_DATA_SETTING}
+     * and {@link #NODE_MASTER_SETTING} must also be false.
+     */
     public static final Setting<Boolean> NODE_LOCAL_STORAGE_SETTING = Setting.boolSetting(
         "node.local_storage",
         true,
@@ -317,11 +316,9 @@ public class Node implements Closeable {
      * @param forbidPrivateIndexSettings whether or not private index settings are forbidden when creating an index; this is used in the
      *                                   test framework for tests that rely on being able to set private settings
      */
-    protected Node(
-        final Environment initialEnvironment,
-        Collection<Class<? extends Plugin>> classpathPlugins,
-        boolean forbidPrivateIndexSettings
-    ) {
+    protected Node(final Environment initialEnvironment,
+                   Collection<Class<? extends Plugin>> classpathPlugins,
+                   boolean forbidPrivateIndexSettings) {
         final List<Closeable> resourcesToClose = new ArrayList<>(); // register everything we need to release in the case of an error
         boolean success = false;
         try {
@@ -634,8 +631,8 @@ public class Node implements Closeable {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             final Map<String, IndexStorePlugin.RecoveryStateFactory> recoveryStateFactories = pluginsService.filterPlugins(
-                IndexStorePlugin.class
-            )
+                    IndexStorePlugin.class
+                )
                 .stream()
                 .map(IndexStorePlugin::getRecoveryStateFactories)
                 .flatMap(m -> m.entrySet().stream())
@@ -646,8 +643,8 @@ public class Node implements Closeable {
             ).stream().map(IndexStorePlugin::getIndexFoldersDeletionListeners).flatMap(List::stream).collect(Collectors.toList());
 
             final Map<String, IndexStorePlugin.SnapshotCommitSupplier> snapshotCommitSuppliers = pluginsService.filterPlugins(
-                IndexStorePlugin.class
-            )
+                    IndexStorePlugin.class
+                )
                 .stream()
                 .map(IndexStorePlugin::getSnapshotCommitSuppliers)
                 .flatMap(m -> m.entrySet().stream())
@@ -1454,9 +1451,12 @@ public class Node implements Closeable {
         final BootstrapContext context,
         final BoundTransportAddress boundTransportAddress,
         List<BootstrapCheck> bootstrapChecks
-    ) throws NodeValidationException {}
+    ) throws NodeValidationException {
+    }
 
-    /** Writes a file to the logs dir containing the ports for the given transport type */
+    /**
+     * Writes a file to the logs dir containing the ports for the given transport type
+     */
     private void writePortsFile(String type, BoundTransportAddress boundAddress) {
         Path tmpPortsFile = environment.logsFile().resolve(type + ".ports.tmp");
         try (BufferedWriter writer = Files.newBufferedWriter(tmpPortsFile, Charset.forName("UTF-8"))) {
@@ -1484,6 +1484,7 @@ public class Node implements Closeable {
 
     /**
      * Creates a new {@link CircuitBreakerService} based on the settings provided.
+     *
      * @see #BREAKER_TYPE_KEY
      */
     public static CircuitBreakerService createCircuitBreakerService(
@@ -1553,6 +1554,7 @@ public class Node implements Closeable {
 
     /**
      * Get Custom Name Resolvers list based on a Discovery Plugins list
+     *
      * @param discoveryPlugins Discovery plugins list
      */
     private List<NetworkService.CustomNameResolver> getCustomNameResolvers(List<DiscoveryPlugin> discoveryPlugins) {
@@ -1566,7 +1568,9 @@ public class Node implements Closeable {
         return customNameResolvers;
     }
 
-    /** Constructs a ClusterInfoService which may be mocked for tests. */
+    /**
+     * Constructs a ClusterInfoService which may be mocked for tests.
+     */
     protected ClusterInfoService newClusterInfoService(
         Settings settings,
         ClusterService clusterService,
@@ -1581,7 +1585,9 @@ public class Node implements Closeable {
         return service;
     }
 
-    /** Constructs a {@link org.elasticsearch.http.HttpServerTransport} which may be mocked for tests. */
+    /**
+     * Constructs a {@link org.elasticsearch.http.HttpServerTransport} which may be mocked for tests.
+     */
     protected HttpServerTransport newHttpTransport(NetworkModule networkModule) {
         return networkModule.getHttpServerTransportSupplier().get();
     }

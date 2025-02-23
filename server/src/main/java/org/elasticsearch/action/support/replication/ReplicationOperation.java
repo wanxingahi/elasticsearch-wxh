@@ -78,18 +78,16 @@ public class ReplicationOperation<
 
     private final List<ReplicationResponse.ShardInfo.Failure> shardReplicaFailures = Collections.synchronizedList(new ArrayList<>());
 
-    public ReplicationOperation(
-        Request request,
-        Primary<Request, ReplicaRequest, PrimaryResultT> primary,
-        ActionListener<PrimaryResultT> listener,
-        Replicas<ReplicaRequest> replicas,
-        Logger logger,
-        ThreadPool threadPool,
-        String opType,
-        long primaryTerm,
-        TimeValue initialRetryBackoffBound,
-        TimeValue retryTimeout
-    ) {
+    public ReplicationOperation(Request request,
+                                Primary<Request, ReplicaRequest, PrimaryResultT> primary,
+                                ActionListener<PrimaryResultT> listener,
+                                Replicas<ReplicaRequest> replicas,
+                                Logger logger,
+                                ThreadPool threadPool,
+                                String opType,
+                                long primaryTerm,
+                                TimeValue initialRetryBackoffBound,
+                                TimeValue retryTimeout) {
         this.replicasProxy = replicas;
         this.primary = primary;
         this.resultListener = listener;
@@ -185,13 +183,11 @@ public class ReplicationOperation<
         }
     }
 
-    private void performOnReplicas(
-        final ReplicaRequest replicaRequest,
-        final long globalCheckpoint,
-        final long maxSeqNoOfUpdatesOrDeletes,
-        final ReplicationGroup replicationGroup,
-        final PendingReplicationActions pendingReplicationActions
-    ) {
+    private void performOnReplicas(final ReplicaRequest replicaRequest,
+                                   final long globalCheckpoint,
+                                   final long maxSeqNoOfUpdatesOrDeletes,
+                                   final ReplicationGroup replicationGroup,
+                                   final PendingReplicationActions pendingReplicationActions) {
         // for total stats, add number of unassigned shards and
         // number of initializing shards that are not ready yet to receive operations (recovery has not opened engine yet on the target)
         totalShards.addAndGet(replicationGroup.getSkippedShards().size());
@@ -205,13 +201,11 @@ public class ReplicationOperation<
         }
     }
 
-    private void performOnReplica(
-        final ShardRouting shard,
-        final ReplicaRequest replicaRequest,
-        final long globalCheckpoint,
-        final long maxSeqNoOfUpdatesOrDeletes,
-        final PendingReplicationActions pendingReplicationActions
-    ) {
+    private void performOnReplica(final ShardRouting shard,
+                                  final ReplicaRequest replicaRequest,
+                                  final long globalCheckpoint,
+                                  final long maxSeqNoOfUpdatesOrDeletes,
+                                  final PendingReplicationActions pendingReplicationActions) {
         if (logger.isTraceEnabled()) {
             logger.trace("[{}] sending op [{}] to replica {} for request [{}]", shard.shardId(), opType, shard, replicaRequest);
         }
@@ -271,8 +265,7 @@ public class ReplicationOperation<
             threadPool,
             initialRetryBackoffBound,
             retryTimeout,
-            replicationListener
-        ) {
+            replicationListener) {
 
             @Override
             public void tryAction(ActionListener<ReplicaResponse> listener) {
@@ -485,18 +478,18 @@ public class ReplicationOperation<
          * listener when the primary request is completed. Yes, the primary request might complete before the method returns. Yes, it might
          * also complete after. Deal with it.
          *
-         * @param request the request to perform
+         * @param request  the request to perform
          * @param listener result listener
          */
         void perform(RequestT request, ActionListener<PrimaryResultT> listener);
 
         /**
          * Notifies the primary of a local checkpoint for the given allocation.
-         *
+         * <p>
          * Note: The primary will use this information to advance the global checkpoint if possible.
          *
          * @param allocationId allocation ID of the shard corresponding to the supplied local checkpoint
-         * @param checkpoint the *local* checkpoint for the shard
+         * @param checkpoint   the *local* checkpoint for the shard
          */
         void updateLocalCheckpointForShard(String allocationId, long checkpoint);
 
@@ -580,11 +573,11 @@ public class ReplicationOperation<
          * of active shards. Whether a failure is needed is left up to the
          * implementation.
          *
-         * @param replica      shard to fail
-         * @param primaryTerm  the primary term
-         * @param message      a (short) description of the reason
-         * @param exception    the original exception which caused the ReplicationOperation to request the shard to be failed
-         * @param listener     a listener that will be notified when the failing shard has been removed from the in-sync set
+         * @param replica     shard to fail
+         * @param primaryTerm the primary term
+         * @param message     a (short) description of the reason
+         * @param exception   the original exception which caused the ReplicationOperation to request the shard to be failed
+         * @param listener    a listener that will be notified when the failing shard has been removed from the in-sync set
          */
         void failShardIfNeeded(ShardRouting replica, long primaryTerm, String message, Exception exception, ActionListener<Void> listener);
 
@@ -650,8 +643,9 @@ public class ReplicationOperation<
 
         /**
          * Run actions to be triggered post replication
+         *
          * @param listener calllback that is invoked after post replication actions have completed
-         * */
+         */
         void runPostReplicationActions(ActionListener<Void> listener);
     }
 }
