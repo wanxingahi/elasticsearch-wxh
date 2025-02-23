@@ -91,12 +91,12 @@ public class RecoveryTarget extends AbstractRefCounted implements RecoveryTarget
     /**
      * Creates a new recovery target object that represents a recovery to the provided shard.
      *
-     * @param indexShard                        local shard where we want to recover to
-     * @param sourceNode                        source node of the recovery where we recover from
-     * @param snapshotFileDownloadsPermit       a permit that allows to download files from a snapshot,
-     *                                          limiting the concurrent snapshot file downloads per node
-     *                                          preventing the exhaustion of repository resources.
-     * @param listener                          called when recovery is completed/failed
+     * @param indexShard                  local shard where we want to recover to
+     * @param sourceNode                  source node of the recovery where we recover from
+     * @param snapshotFileDownloadsPermit a permit that allows to download files from a snapshot,
+     *                                    limiting the concurrent snapshot file downloads per node
+     *                                    preventing the exhaustion of repository resources.
+     * @param listener                    called when recovery is completed/failed
      */
     public RecoveryTarget(
         IndexShard indexShard,
@@ -175,7 +175,9 @@ public class RecoveryTarget extends AbstractRefCounted implements RecoveryTarget
         return snapshotFileDownloadsPermit != null;
     }
 
-    /** return the last time this RecoveryStatus was used (based on System.nanoTime() */
+    /**
+     * return the last time this RecoveryStatus was used (based on System.nanoTime()
+     */
     public long lastAccessTime() {
         if (recoveryMonitorEnabled) {
             return lastAccessTime;
@@ -183,7 +185,9 @@ public class RecoveryTarget extends AbstractRefCounted implements RecoveryTarget
         return System.nanoTime();
     }
 
-    /** sets the lasAccessTime flag to now */
+    /**
+     * sets the lasAccessTime flag to now
+     */
     public void setLastAccessTime() {
         lastAccessTime = System.nanoTime();
     }
@@ -290,7 +294,9 @@ public class RecoveryTarget extends AbstractRefCounted implements RecoveryTarget
         listener.onRecoveryFailure(state(), e, sendShardFailure);
     }
 
-    /** mark the current recovery as done */
+    /**
+     * mark the current recovery as done
+     */
     public void markAsDone() {
         if (finished.compareAndSet(false, true)) {
             assert multiFileWriter.tempFileNames.isEmpty() : "not all temporary files are renamed";
@@ -394,15 +400,13 @@ public class RecoveryTarget extends AbstractRefCounted implements RecoveryTarget
     }
 
     @Override
-    public void indexTranslogOperations(
-        final List<Translog.Operation> operations,
-        final int totalTranslogOps,
-        final long maxSeenAutoIdTimestampOnPrimary,
-        final long maxSeqNoOfDeletesOrUpdatesOnPrimary,
-        final RetentionLeases retentionLeases,
-        final long mappingVersionOnPrimary,
-        final ActionListener<Long> listener
-    ) {
+    public void indexTranslogOperations(final List<Translog.Operation> operations,
+                                        final int totalTranslogOps,
+                                        final long maxSeenAutoIdTimestampOnPrimary,
+                                        final long maxSeqNoOfDeletesOrUpdatesOnPrimary,
+                                        final RetentionLeases retentionLeases,
+                                        final long mappingVersionOnPrimary,
+                                        final ActionListener<Long> listener) {
         ActionListener.completeWith(listener, () -> {
             final RecoveryState.Translog translog = state().getTranslog();
             translog.totalOperations(totalTranslogOps);
@@ -593,7 +597,9 @@ public class RecoveryTarget extends AbstractRefCounted implements RecoveryTarget
         indexShard.recoveryStats().addThrottleTime(throttleTimeInNanos);
     }
 
-    /** Get a temporary name for the provided file name. */
+    /**
+     * Get a temporary name for the provided file name.
+     */
     public String getTempNameForFile(String origFile) {
         return multiFileWriter.getTempNameForFile(origFile);
     }

@@ -2015,7 +2015,9 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
      **/
     public void openEngineAndRecoverFromTranslog() throws IOException {
         recoveryState.validateCurrentStage(RecoveryState.Stage.INDEX);
+        // 进入VERIFY_INDEX阶段
         maybeCheckIndex();
+        // 进入TRANSLOG阶段
         recoveryState.setLocalTranslogStage();
         final RecoveryState.Translog translogRecoveryStats = recoveryState.getTranslog();
         final Engine.TranslogRecoveryRunner translogRecoveryRunner = (engine, snapshot) -> {
@@ -2029,6 +2031,7 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
             );
         };
         loadGlobalCheckpointToReplicationTracker();
+        // start engine
         innerOpenEngineAndTranslog(replicationTracker);
         getEngine().recoverFromTranslog(translogRecoveryRunner, Long.MAX_VALUE);
     }
@@ -2039,6 +2042,7 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
      */
     public void openEngineAndSkipTranslogRecovery() throws IOException {
         assert routingEntry().recoverySource().getType() == RecoverySource.Type.PEER : "not a peer recovery [" + routingEntry() + "]";
+        // 进入TRANSLOG阶段
         recoveryState.validateCurrentStage(RecoveryState.Stage.TRANSLOG);
         loadGlobalCheckpointToReplicationTracker();
         innerOpenEngineAndTranslog(replicationTracker);
@@ -2187,6 +2191,7 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
     public void finalizeRecovery() {
         recoveryState().setStage(RecoveryState.Stage.FINALIZE);
         Engine engine = getEngine();
+        // 将缓冲中数据刷入文件，但不刷盘，数据在操作系统中的cache中
         engine.refresh("recovery_finalization");
         engine.config().setEnableGcDeletes(true);
     }
@@ -3240,18 +3245,20 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
         }
     }
 
-    private void executeRecovery(
-        String reason,
-        RecoveryState recoveryState,
-        PeerRecoveryTargetService.RecoveryListener recoveryListener,
-        CheckedConsumer<ActionListener<Boolean>, Exception> action
-    ) {
+    private void executeRecovery(String reason,
+                                 RecoveryState recoveryState,
+                                 PeerRecoveryTargetService.RecoveryListener recoveryListener,
+                                 CheckedConsumer<ActionListener<Boolean>, Exception> action) {
         markAsRecovering(reason, recoveryState); // mark the shard as recovering on the cluster state thread
-        threadPool.generic().execute(ActionRunnable.wrap(ActionListener.wrap(r -> {
-            if (r) {
-                recoveryListener.onRecoveryDone(recoveryState, getTimestampRange());
-            }
-        }, e -> recoveryListener.onRecoveryFailure(recoveryState, new RecoveryFailedException(recoveryState, null, e), true)), action));
+        threadPool.generic().execute(
+            ActionRunnable.wrap(
+                ActionListener.wrap(r -> {
+                    if (r) {
+                        recoveryListener.onRecoveryDone(recoveryState, getTimestampRange());
+                    }
+                }, e -> recoveryListener.onRecoveryFailure(recoveryState, new RecoveryFailedException(recoveryState, null, e), true)),
+                action)
+        );
     }
 
     /**

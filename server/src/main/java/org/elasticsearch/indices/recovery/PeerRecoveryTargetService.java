@@ -98,13 +98,11 @@ public class PeerRecoveryTargetService implements IndexEventListener {
 
     private final RecoveriesCollection onGoingRecoveries;
 
-    public PeerRecoveryTargetService(
-        ThreadPool threadPool,
-        TransportService transportService,
-        RecoverySettings recoverySettings,
-        ClusterService clusterService,
-        SnapshotFilesProvider snapshotFilesProvider
-    ) {
+    public PeerRecoveryTargetService(ThreadPool threadPool,
+                                     TransportService transportService,
+                                     RecoverySettings recoverySettings,
+                                     ClusterService clusterService,
+                                     SnapshotFilesProvider snapshotFilesProvider) {
         this.threadPool = threadPool;
         this.transportService = transportService;
         this.recoverySettings = recoverySettings;
@@ -226,6 +224,7 @@ public class PeerRecoveryTargetService implements IndexEventListener {
                     indexShard.preRecovery();
                     assert recoveryTarget.sourceNode() != null : "can not do a recovery without a source node";
                     logger.trace("{} preparing shard for peer recovery", recoveryTarget.shardId());
+                    // 进入INDEX阶段
                     indexShard.prepareForIndexRecovery();
                     final long startingSeqNo = indexShard.recoverLocallyUpToGlobalCheckpoint();
                     assert startingSeqNo == UNASSIGNED_SEQ_NO || recoveryTarget.state().getStage() == RecoveryState.Stage.TRANSLOG
@@ -269,12 +268,10 @@ public class PeerRecoveryTargetService implements IndexEventListener {
      *                       This is the first operation after the local checkpoint of the safe commit if exists.
      * @return a start recovery request
      */
-    public static StartRecoveryRequest getStartRecoveryRequest(
-        Logger logger,
-        DiscoveryNode localNode,
-        RecoveryTarget recoveryTarget,
-        long startingSeqNo
-    ) {
+    public static StartRecoveryRequest getStartRecoveryRequest(Logger logger,
+                                                               DiscoveryNode localNode,
+                                                               RecoveryTarget recoveryTarget,
+                                                               long startingSeqNo) {
         final StartRecoveryRequest request;
         logger.trace("{} collecting local files for [{}]", recoveryTarget.shardId(), recoveryTarget.sourceNode());
 

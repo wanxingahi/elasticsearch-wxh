@@ -36,7 +36,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RecoveriesCollection {
 
-    /** This is the single source of truth for ongoing recoveries. If it's not here, it was canceled or done */
+    /**
+     * This is the single source of truth for ongoing recoveries. If it's not here, it was canceled or done
+     */
     private final ConcurrentMap<Long, RecoveryTarget> onGoingRecoveries = ConcurrentCollections.newConcurrentMap();
 
     private final Logger logger;
@@ -52,14 +54,12 @@ public class RecoveriesCollection {
      *
      * @return the id of the new recovery.
      */
-    public long startRecovery(
-        IndexShard indexShard,
-        DiscoveryNode sourceNode,
-        SnapshotFilesProvider snapshotFilesProvider,
-        PeerRecoveryTargetService.RecoveryListener listener,
-        TimeValue activityTimeout,
-        @Nullable Releasable snapshotFileDownloadsPermit
-    ) {
+    public long startRecovery(IndexShard indexShard,
+                              DiscoveryNode sourceNode,
+                              SnapshotFilesProvider snapshotFilesProvider,
+                              PeerRecoveryTargetService.RecoveryListener listener,
+                              TimeValue activityTimeout,
+                              @Nullable Releasable snapshotFileDownloadsPermit) {
         RecoveryTarget recoveryTarget = new RecoveryTarget(
             indexShard,
             sourceNode,
@@ -90,8 +90,8 @@ public class RecoveriesCollection {
     /**
      * Resets the recovery and performs a recovery restart on the currently recovering index shard
      *
-     * @see IndexShard#performRecoveryRestart()
      * @return newly created RecoveryTarget
+     * @see IndexShard#performRecoveryRestart()
      */
     public RecoveryTarget resetRecovery(final long recoveryId, final TimeValue activityTimeout) {
         RecoveryTarget oldRecoveryTarget = null;
@@ -158,7 +158,9 @@ public class RecoveriesCollection {
         return null;
     }
 
-    /** Similar to {@link #getRecovery(long)} but throws an exception if no recovery is found */
+    /**
+     * Similar to {@link #getRecovery(long)} but throws an exception if no recovery is found
+     */
     public RecoveryRef getRecoverySafe(long id, ShardId shardId) {
         RecoveryRef recoveryRef = getRecovery(id);
         if (recoveryRef == null) {
@@ -168,7 +170,9 @@ public class RecoveriesCollection {
         return recoveryRef;
     }
 
-    /** cancel the recovery with the given id (if found) and remove it from the recovery collection */
+    /**
+     * cancel the recovery with the given id (if found) and remove it from the recovery collection
+     */
     public boolean cancelRecovery(long id, String reason) {
         RecoveryTarget removed = onGoingRecoveries.remove(id);
         boolean cancelled = false;
@@ -207,7 +211,9 @@ public class RecoveriesCollection {
         }
     }
 
-    /** mark the recovery with the given id as done (if found) */
+    /**
+     * mark the recovery with the given id as done (if found)
+     */
     public void markRecoveryAsDone(long id) {
         RecoveryTarget removed = onGoingRecoveries.remove(id);
         if (removed != null) {
@@ -216,7 +222,9 @@ public class RecoveriesCollection {
         }
     }
 
-    /** the number of ongoing recoveries */
+    /**
+     * the number of ongoing recoveries
+     */
     public int size() {
         return onGoingRecoveries.size();
     }
@@ -224,15 +232,15 @@ public class RecoveriesCollection {
     /**
      * cancel all ongoing recoveries for the given shard
      *
-     * @param reason       reason for cancellation
-     * @param shardId      shardId for which to cancel recoveries
+     * @param reason  reason for cancellation
+     * @param shardId shardId for which to cancel recoveries
      * @return true if a recovery was cancelled
      */
     public boolean cancelRecoveriesForShard(ShardId shardId, String reason) {
         boolean cancelled = false;
         List<RecoveryTarget> matchedRecoveries = new ArrayList<>();
         synchronized (onGoingRecoveries) {
-            for (Iterator<RecoveryTarget> it = onGoingRecoveries.values().iterator(); it.hasNext();) {
+            for (Iterator<RecoveryTarget> it = onGoingRecoveries.values().iterator(); it.hasNext(); ) {
                 RecoveryTarget status = it.next();
                 if (status.shardId().equals(shardId)) {
                     matchedRecoveries.add(status);

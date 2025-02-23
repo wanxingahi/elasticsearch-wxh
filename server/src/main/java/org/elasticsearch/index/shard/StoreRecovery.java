@@ -403,6 +403,7 @@ final class StoreRecovery {
         indexShard.preRecovery();
         final RecoveryState recoveryState = indexShard.recoveryState();
         final boolean indexShouldExists = recoveryState.getRecoverySource().getType() != RecoverySource.Type.EMPTY_STORE;
+        // 进入Index阶段
         indexShard.prepareForIndexRecovery();
         SegmentInfos si = null;
         final Store store = indexShard.store();
@@ -411,6 +412,7 @@ final class StoreRecovery {
             try {
                 store.failIfCorrupted();
                 try {
+                    // 读取最后一次提交的分段信息
                     si = store.readLastCommittedSegmentsInfo();
                 } catch (Exception e) {
                     String files = "_unknown_";
@@ -471,7 +473,9 @@ final class StoreRecovery {
             }
             indexShard.openEngineAndRecoverFromTranslog();
             indexShard.getEngine().fillSeqNoGaps(indexShard.getPendingPrimaryTerm());
+            // 进入FINALIZE阶段
             indexShard.finalizeRecovery();
+            // 进入DONE阶段
             indexShard.postRecovery("post recovery from shard_store");
         } catch (EngineException | IOException e) {
             throw new IndexShardRecoveryException(shardId, "failed to recover from gateway", e);

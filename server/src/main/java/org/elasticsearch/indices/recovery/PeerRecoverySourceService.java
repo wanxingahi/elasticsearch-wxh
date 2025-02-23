@@ -67,12 +67,10 @@ public class PeerRecoverySourceService extends AbstractLifecycleComponent implem
     final OngoingRecoveries ongoingRecoveries = new OngoingRecoveries();
 
     @Inject
-    public PeerRecoverySourceService(
-        TransportService transportService,
-        IndicesService indicesService,
-        RecoverySettings recoverySettings,
-        RecoveryPlannerService recoveryPlannerService
-    ) {
+    public PeerRecoverySourceService(TransportService transportService,
+                                     IndicesService indicesService,
+                                     RecoverySettings recoverySettings,
+                                     RecoveryPlannerService recoveryPlannerService) {
         this.transportService = transportService;
         this.indicesService = indicesService;
         this.recoverySettings = recoverySettings;
@@ -115,7 +113,8 @@ public class PeerRecoverySourceService extends AbstractLifecycleComponent implem
     }
 
     @Override
-    protected void doClose() {}
+    protected void doClose() {
+    }
 
     @Override
     public void beforeIndexShardClosed(ShardId shardId, @Nullable IndexShard indexShard, Settings indexSettings) {

@@ -949,17 +949,15 @@ public class IndicesClusterStateService extends AbstractLifecycleComponent imple
          * @return a new shard
          * @throws IOException if an I/O exception occurs when creating the shard
          */
-        T createShard(
-            ShardRouting shardRouting,
-            PeerRecoveryTargetService recoveryTargetService,
-            PeerRecoveryTargetService.RecoveryListener recoveryListener,
-            RepositoriesService repositoriesService,
-            Consumer<IndexShard.ShardFailure> onShardFailure,
-            Consumer<ShardId> globalCheckpointSyncer,
-            RetentionLeaseSyncer retentionLeaseSyncer,
-            DiscoveryNode targetNode,
-            @Nullable DiscoveryNode sourceNode
-        ) throws IOException;
+        T createShard(ShardRouting shardRouting,
+                      PeerRecoveryTargetService recoveryTargetService,
+                      PeerRecoveryTargetService.RecoveryListener recoveryListener,
+                      RepositoriesService repositoriesService,
+                      Consumer<IndexShard.ShardFailure> onShardFailure,
+                      Consumer<ShardId> globalCheckpointSyncer,
+                      RetentionLeaseSyncer retentionLeaseSyncer,
+                      DiscoveryNode targetNode,
+                      @Nullable DiscoveryNode sourceNode) throws IOException;
 
         /**
          * Returns shard for the specified id if it exists otherwise returns <code>null</code>.

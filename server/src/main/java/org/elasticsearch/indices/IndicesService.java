@@ -175,8 +175,8 @@ import static org.elasticsearch.search.SearchService.ALLOW_EXPENSIVE_QUERIES;
 
 public class IndicesService extends AbstractLifecycleComponent
     implements
-        IndicesClusterStateService.AllocatedIndices<IndexShard, IndexService>,
-        IndexService.ShardStoreDeleter {
+    IndicesClusterStateService.AllocatedIndices<IndexShard, IndexService>,
+    IndexService.ShardStoreDeleter {
     private static final Logger logger = LogManager.getLogger(IndicesService.class);
 
     public static final String INDICES_SHARDS_CLOSED_TIMEOUT = "indices.shards_closed_timeout";
@@ -312,9 +312,9 @@ public class IndicesService extends AbstractLifecycleComponent
             public void onRemoval(ShardId shardId, String fieldName, boolean wasEvicted, long sizeInBytes) {
                 assert sizeInBytes >= 0
                     : "When reducing circuit breaker, it should be adjusted with a number higher or "
-                        + "equal to 0 and not ["
-                        + sizeInBytes
-                        + "]";
+                    + "equal to 0 and not ["
+                    + sizeInBytes
+                    + "]";
                 circuitBreakerService.getBreaker(CircuitBreaker.FIELDDATA).addWithoutBreaking(-sizeInBytes);
             }
         });
@@ -361,15 +361,15 @@ public class IndicesService extends AbstractLifecycleComponent
         nodeWriteDanglingIndicesInfo = WRITE_DANGLING_INDICES_INFO_SETTING.get(settings);
         danglingIndicesThreadPoolExecutor = nodeWriteDanglingIndicesInfo
             ? EsExecutors.newScaling(
-                nodeName + "/" + DANGLING_INDICES_UPDATE_THREAD_NAME,
-                1,
-                1,
-                0,
-                TimeUnit.MILLISECONDS,
-                true,
-                daemonThreadFactory(nodeName, DANGLING_INDICES_UPDATE_THREAD_NAME),
-                threadPool.getThreadContext()
-            )
+            nodeName + "/" + DANGLING_INDICES_UPDATE_THREAD_NAME,
+            1,
+            1,
+            0,
+            TimeUnit.MILLISECONDS,
+            true,
+            daemonThreadFactory(nodeName, DANGLING_INDICES_UPDATE_THREAD_NAME),
+            threadPool.getThreadContext()
+        )
             : null;
 
         this.allowExpensiveQueries = ALLOW_EXPENSIVE_QUERIES.get(clusterService.getSettings());
@@ -426,6 +426,7 @@ public class IndicesService extends AbstractLifecycleComponent
      * are closed and all shard {@link CacheHelper#addClosedListener(org.apache.lucene.index.IndexReader.ClosedListener) closed
      * listeners} have run. However some {@link IndexEventListener#onStoreClosed(ShardId) shard closed listeners} might not have
      * run.
+     *
      * @return true if all shards closed within the given timeout, false otherwise
      * @throws InterruptedException if the current thread got interrupted while waiting for shards to close
      */
@@ -513,7 +514,7 @@ public class IndicesService extends AbstractLifecycleComponent
 
         return new IndexShardStats(
             indexShard.shardId(),
-            new ShardStats[] {
+            new ShardStats[]{
                 new ShardStats(
                     indexShard.routingEntry(),
                     indexShard.shardPath(),
@@ -521,7 +522,7 @@ public class IndicesService extends AbstractLifecycleComponent
                     commitStats,
                     seqNoStats,
                     retentionLeaseStats
-                ) }
+                )}
         );
     }
 
@@ -570,9 +571,9 @@ public class IndicesService extends AbstractLifecycleComponent
     /**
      * Creates a new {@link IndexService} for the given metadata.
      *
-     * @param indexMetadata          the index metadata to create the index for
-     * @param builtInListeners       a list of built-in lifecycle {@link IndexEventListener} that should should be used along side with the
-     *                               per-index listeners
+     * @param indexMetadata    the index metadata to create the index for
+     * @param builtInListeners a list of built-in lifecycle {@link IndexEventListener} that should should be used along side with the
+     *                         per-index listeners
      * @throws ResourceAlreadyExistsException if the index already exists.
      */
     @Override
@@ -777,7 +778,7 @@ public class IndicesService extends AbstractLifecycleComponent
     /**
      * creates a new mapper service for the given index, in order to do administrative work like mapping updates.
      * This *should not* be used for document parsing. Doing so will result in an exception.
-     *
+     * <p>
      * Note: the returned {@link MapperService} should be closed when unneeded.
      */
     public synchronized MapperService createIndexMapperService(IndexMetadata indexMetadata) throws IOException {
@@ -829,17 +830,15 @@ public class IndicesService extends AbstractLifecycleComponent
     }
 
     @Override
-    public IndexShard createShard(
-        final ShardRouting shardRouting,
-        final PeerRecoveryTargetService recoveryTargetService,
-        final PeerRecoveryTargetService.RecoveryListener recoveryListener,
-        final RepositoriesService repositoriesService,
-        final Consumer<IndexShard.ShardFailure> onShardFailure,
-        final Consumer<ShardId> globalCheckpointSyncer,
-        final RetentionLeaseSyncer retentionLeaseSyncer,
-        final DiscoveryNode targetNode,
-        final DiscoveryNode sourceNode
-    ) throws IOException {
+    public IndexShard createShard(final ShardRouting shardRouting,
+                                  final PeerRecoveryTargetService recoveryTargetService,
+                                  final PeerRecoveryTargetService.RecoveryListener recoveryListener,
+                                  final RepositoriesService repositoriesService,
+                                  final Consumer<IndexShard.ShardFailure> onShardFailure,
+                                  final Consumer<ShardId> globalCheckpointSyncer,
+                                  final RetentionLeaseSyncer retentionLeaseSyncer,
+                                  final DiscoveryNode targetNode,
+                                  final DiscoveryNode sourceNode) throws IOException {
         Objects.requireNonNull(retentionLeaseSyncer);
         ensureChangesAllowed();
         IndexService indexService = indexService(shardRouting.index());
@@ -847,17 +846,23 @@ public class IndicesService extends AbstractLifecycleComponent
         RecoveryState recoveryState = indexService.createRecoveryState(shardRouting, targetNode, sourceNode);
         IndexShard indexShard = indexService.createShard(shardRouting, globalCheckpointSyncer, retentionLeaseSyncer);
         indexShard.addShardFailureCallback(onShardFailure);
-        indexShard.startRecovery(recoveryState, recoveryTargetService, recoveryListener, repositoriesService, (type, mapping) -> {
-            assert recoveryState.getRecoverySource().getType() == RecoverySource.Type.LOCAL_SHARDS
-                : "mapping update consumer only required by local shards recovery";
-            client.admin()
-                .indices()
-                .preparePutMapping()
-                .setConcreteIndex(shardRouting.index()) // concrete index - no name clash, it uses uuid
-                .setType(type)
-                .setSource(mapping.source().string(), XContentType.JSON)
-                .get();
-        }, this);
+        indexShard.startRecovery(
+            recoveryState,
+            recoveryTargetService,
+            recoveryListener,
+            repositoriesService,
+            (type, mapping) -> {
+                assert recoveryState.getRecoverySource().getType() == RecoverySource.Type.LOCAL_SHARDS : "mapping update consumer only required by local shards recovery";
+                client.admin()
+                    .indices()
+                    .preparePutMapping()
+                    .setConcreteIndex(shardRouting.index()) // concrete index - no name clash, it uses uuid
+                    .setType(type)
+                    .setSource(mapping.source().string(), XContentType.JSON)
+                    .get();
+            },
+            this
+        );
         return indexShard;
     }
 
@@ -971,7 +976,7 @@ public class IndicesService extends AbstractLifecycleComponent
     /**
      * Deletes the index store trying to acquire all shards locks for this index.
      * This method will delete the metadata for the index even if the actual shards can't be locked.
-     *
+     * <p>
      * Package private for testing
      */
     void deleteIndexStore(String reason, IndexMetadata metadata) throws IOException {
@@ -1041,8 +1046,9 @@ public class IndicesService extends AbstractLifecycleComponent
 
     /**
      * Deletes the shard with an already acquired shard lock.
-     * @param reason the reason for the shard deletion
-     * @param lock the lock of the shard to delete
+     *
+     * @param reason        the reason for the shard deletion
+     * @param lock          the lock of the shard to delete
      * @param indexSettings the shards index settings.
      * @throws IOException if an IOException occurs
      */
@@ -1061,12 +1067,12 @@ public class IndicesService extends AbstractLifecycleComponent
      * This method deletes the shard contents on disk for the given shard ID. This method will fail if the shard deleting
      * is prevented by {@link #canDeleteShardContent(ShardId, IndexSettings)}
      * of if the shards lock can not be acquired.
-     *
+     * <p>
      * On data nodes, if the deleted shard is the last shard folder in its index, the method will attempt to remove
      * the index folder as well.
      *
-     * @param reason the reason for the shard deletion
-     * @param shardId the shards ID to delete
+     * @param reason       the reason for the shard deletion
+     * @param shardId      the shards ID to delete
      * @param clusterState . This is required to access the indexes settings etc.
      * @throws IOException if an IOException occurs
      */
@@ -1105,6 +1111,7 @@ public class IndicesService extends AbstractLifecycleComponent
      * This method returns true if the current node is allowed to delete the given index.
      * This is the case if the index is deleted in the metadata or there is no allocation
      * on the local node and the index isn't on a shared file system.
+     *
      * @param index {@code Index} to check whether deletion is allowed
      * @return true if the index can be deleted on this node
      */
@@ -1119,7 +1126,8 @@ public class IndicesService extends AbstractLifecycleComponent
      * Verify that the contents on disk for the given index is deleted; if not, delete the contents.
      * This method assumes that an index is already deleted in the cluster state and/or explicitly
      * through index tombstones.
-     * @param index {@code Index} to make sure its deleted from disk
+     *
+     * @param index        {@code Index} to make sure its deleted from disk
      * @param clusterState {@code ClusterState} to ensure the index is not part of it
      * @return IndexMetadata for the index loaded from disk
      */
@@ -1173,7 +1181,7 @@ public class IndicesService extends AbstractLifecycleComponent
     /**
      * Returns <code>ShardDeletionCheckResult</code> signaling whether the shards content for the given shard can be deleted.
      *
-     * @param shardId the shard to delete.
+     * @param shardId       the shard to delete.
      * @param indexSettings the shards's relevant {@link IndexSettings}. This is required to access the indexes settings etc.
      */
     public ShardDeletionCheckResult canDeleteShardContent(ShardId shardId, IndexSettings indexSettings) {
@@ -1291,7 +1299,8 @@ public class IndicesService extends AbstractLifecycleComponent
      * they are used by a different process ie. on Windows where files might still be open by a virus scanner. On a shared
      * filesystem a replica might not have been closed when the primary is deleted causing problems on delete calls so we
      * schedule there deletes later.
-     * @param index the index to process the pending deletes for
+     *
+     * @param index   the index to process the pending deletes for
      * @param timeout the timeout used for processing pending deletes
      */
     @Override
@@ -1516,7 +1525,7 @@ public class IndicesService extends AbstractLifecycleComponent
         assert canCache(request, context);
         final DirectoryReader directoryReader = context.searcher().getDirectoryReader();
 
-        boolean[] loadedFromCache = new boolean[] { true };
+        boolean[] loadedFromCache = new boolean[]{true};
         BytesReference cacheKey = request.cacheKey(requestCacheKeyDifferentiator);
         BytesReference bytesReference = cacheShardLevelResult(
             context.indexShard(),
@@ -1566,10 +1575,11 @@ public class IndicesService extends AbstractLifecycleComponent
 
     /**
      * Cache something calculated at the shard level.
-     * @param shard the shard this item is part of
-     * @param reader a reader for this shard. Used to invalidate the cache when there are changes.
+     *
+     * @param shard    the shard this item is part of
+     * @param reader   a reader for this shard. Used to invalidate the cache when there are changes.
      * @param cacheKey key for the thing being cached within this shard
-     * @param loader loads the data into the cache if needed
+     * @param loader   loads the data into the cache if needed
      * @return the contents of the cache or the result of calling the loader
      */
     private BytesReference cacheShardLevelResult(
