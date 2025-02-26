@@ -72,14 +72,12 @@ public class RemoteRecoveryTargetHandler implements RecoveryTargetHandler {
     private final boolean retriesSupported;
     private volatile boolean isCancelled = false;
 
-    public RemoteRecoveryTargetHandler(
-        long recoveryId,
-        ShardId shardId,
-        TransportService transportService,
-        DiscoveryNode targetNode,
-        RecoverySettings recoverySettings,
-        Consumer<Long> onSourceThrottle
-    ) {
+    public RemoteRecoveryTargetHandler(long recoveryId,
+                                       ShardId shardId,
+                                       TransportService transportService,
+                                       DiscoveryNode targetNode,
+                                       RecoverySettings recoverySettings,
+                                       Consumer<Long> onSourceThrottle) {
         this.transportService = transportService;
         this.threadPool = transportService.getThreadPool();
         this.recoveryId = recoveryId;
@@ -150,15 +148,13 @@ public class RemoteRecoveryTargetHandler implements RecoveryTargetHandler {
     }
 
     @Override
-    public void indexTranslogOperations(
-        final List<Translog.Operation> operations,
-        final int totalTranslogOps,
-        final long maxSeenAutoIdTimestampOnPrimary,
-        final long maxSeqNoOfDeletesOrUpdatesOnPrimary,
-        final RetentionLeases retentionLeases,
-        final long mappingVersionOnPrimary,
-        final ActionListener<Long> listener
-    ) {
+    public void indexTranslogOperations(final List<Translog.Operation> operations,
+                                        final int totalTranslogOps,
+                                        final long maxSeenAutoIdTimestampOnPrimary,
+                                        final long maxSeqNoOfDeletesOrUpdatesOnPrimary,
+                                        final RetentionLeases retentionLeases,
+                                        final long mappingVersionOnPrimary,
+                                        final ActionListener<Long> listener) {
         final String action = PeerRecoveryTargetService.Actions.TRANSLOG_OPS;
         final long requestSeqNo = requestSeqNoGenerator.getAndIncrement();
         final RecoveryTranslogOperationsRequest request = new RecoveryTranslogOperationsRequest(
@@ -177,14 +173,12 @@ public class RemoteRecoveryTargetHandler implements RecoveryTargetHandler {
     }
 
     @Override
-    public void receiveFileInfo(
-        List<String> phase1FileNames,
-        List<Long> phase1FileSizes,
-        List<String> phase1ExistingFileNames,
-        List<Long> phase1ExistingFileSizes,
-        int totalTranslogOps,
-        ActionListener<Void> listener
-    ) {
+    public void receiveFileInfo(List<String> phase1FileNames,
+                                List<Long> phase1FileSizes,
+                                List<String> phase1ExistingFileNames,
+                                List<Long> phase1ExistingFileSizes,
+                                int totalTranslogOps,
+                                ActionListener<Void> listener) {
         final String action = PeerRecoveryTargetService.Actions.FILES_INFO;
         final long requestSeqNo = requestSeqNoGenerator.getAndIncrement();
         RecoveryFilesInfoRequest request = new RecoveryFilesInfoRequest(
@@ -202,12 +196,10 @@ public class RemoteRecoveryTargetHandler implements RecoveryTargetHandler {
     }
 
     @Override
-    public void cleanFiles(
-        int totalTranslogOps,
-        long globalCheckpoint,
-        Store.MetadataSnapshot sourceMetadata,
-        ActionListener<Void> listener
-    ) {
+    public void cleanFiles(int totalTranslogOps,
+                           long globalCheckpoint,
+                           Store.MetadataSnapshot sourceMetadata,
+                           ActionListener<Void> listener) {
         final String action = PeerRecoveryTargetService.Actions.CLEAN_FILES;
         final long requestSeqNo = requestSeqNoGenerator.getAndIncrement();
         final RecoveryCleanFilesRequest request = new RecoveryCleanFilesRequest(
@@ -224,12 +216,10 @@ public class RemoteRecoveryTargetHandler implements RecoveryTargetHandler {
     }
 
     @Override
-    public void restoreFileFromSnapshot(
-        String repository,
-        IndexId indexId,
-        BlobStoreIndexShardSnapshot.FileInfo snapshotFile,
-        ActionListener<Void> listener
-    ) {
+    public void restoreFileFromSnapshot(String repository,
+                                        IndexId indexId,
+                                        BlobStoreIndexShardSnapshot.FileInfo snapshotFile,
+                                        ActionListener<Void> listener) {
         final String action = PeerRecoveryTargetService.Actions.RESTORE_FILE_FROM_SNAPSHOT;
         final long requestSeqNo = requestSeqNoGenerator.getAndIncrement();
         final RecoverySnapshotFileRequest request = new RecoverySnapshotFileRequest(
@@ -246,14 +236,12 @@ public class RemoteRecoveryTargetHandler implements RecoveryTargetHandler {
     }
 
     @Override
-    public void writeFileChunk(
-        StoreFileMetadata fileMetadata,
-        long position,
-        ReleasableBytesReference content,
-        boolean lastChunk,
-        int totalTranslogOps,
-        ActionListener<Void> listener
-    ) {
+    public void writeFileChunk(StoreFileMetadata fileMetadata,
+                               long position,
+                               ReleasableBytesReference content,
+                               boolean lastChunk,
+                               int totalTranslogOps,
+                               ActionListener<Void> listener) {
         // Pause using the rate limiter, if desired, to throttle the recovery
         final long throttleTimeInNanos;
         // always fetch the ratelimiter - it might be updated in real-time on the recovery settings

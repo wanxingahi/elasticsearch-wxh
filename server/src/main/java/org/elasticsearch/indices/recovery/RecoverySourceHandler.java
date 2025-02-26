@@ -98,7 +98,7 @@ import static org.elasticsearch.common.util.CollectionUtils.concatLists;
  * RecoverySourceHandler handles the three phases of shard recovery, which is
  * everything relating to copying the segment files as well as sending translog
  * operations across the wire once the segments have been copied.
- *
+ * <p>
  * Note: There is always one source handler per recovery that handles all the
  * file and translog transfer. This handler is completely isolated from other recoveries
  * while the {@link RateLimiter} passed via {@link RecoverySettings} is shared across recoveries
@@ -125,18 +125,16 @@ public class RecoverySourceHandler {
     private final List<Closeable> resources = new CopyOnWriteArrayList<>();
     private final ListenableFuture<RecoveryResponse> future = new ListenableFuture<>();
 
-    public RecoverySourceHandler(
-        IndexShard shard,
-        RecoveryTargetHandler recoveryTarget,
-        ThreadPool threadPool,
-        StartRecoveryRequest request,
-        int fileChunkSizeInBytes,
-        int maxConcurrentFileChunks,
-        int maxConcurrentOperations,
-        int maxConcurrentSnapshotFileDownloads,
-        boolean useSnapshots,
-        RecoveryPlannerService recoveryPlannerService
-    ) {
+    public RecoverySourceHandler(IndexShard shard,
+                                 RecoveryTargetHandler recoveryTarget,
+                                 ThreadPool threadPool,
+                                 StartRecoveryRequest request,
+                                 int fileChunkSizeInBytes,
+                                 int maxConcurrentFileChunks,
+                                 int maxConcurrentOperations,
+                                 int maxConcurrentSnapshotFileDownloads,
+                                 boolean useSnapshots,
+                                 RecoveryPlannerService recoveryPlannerService) {
         this.shard = shard;
         this.recoveryTarget = recoveryTarget;
         this.threadPool = threadPool;
@@ -189,21 +187,15 @@ public class RecoverySourceHandler {
             final SetOnce<RetentionLease> retentionLeaseRef = new SetOnce<>();
 
             runUnderPrimaryPermit(() -> {
-                final IndexShardRoutingTable routingTable = shard.getReplicationGroup().getRoutingTable();
-                ShardRouting targetShardRouting = routingTable.getByAllocationId(request.targetAllocationId());
-                if (targetShardRouting == null) {
-                    logger.debug(
-                        "delaying recovery of {} as it is not listed as assigned to target node {}",
-                        request.shardId(),
-                        request.targetNode()
-                    );
-                    throw new DelayRecoveryException("source node does not have the shard listed in its state as allocated on the node");
-                }
-                assert targetShardRouting.initializing() : "expected recovery target to be initializing but was " + targetShardRouting;
-                retentionLeaseRef.set(
-                    shard.getRetentionLeases().get(ReplicationTracker.getPeerRecoveryRetentionLeaseId(targetShardRouting))
-                );
-            },
+                    final IndexShardRoutingTable routingTable = shard.getReplicationGroup().getRoutingTable();
+                    ShardRouting targetShardRouting = routingTable.getByAllocationId(request.targetAllocationId());
+                    if (targetShardRouting == null) {
+                        logger.debug("delaying recovery of {} as it is not listed as assigned to target node {}", request.shardId(), request.targetNode());
+                        throw new DelayRecoveryException("source node does not have the shard listed in its state as allocated on the node");
+                    }
+                    assert targetShardRouting.initializing() : "expected recovery target to be initializing but was " + targetShardRouting;
+                    retentionLeaseRef.set(shard.getRetentionLeases().get(ReplicationTracker.getPeerRecoveryRetentionLeaseId(targetShardRouting)));
+                },
                 shardId + " validating recovery target [" + request.targetAllocationId() + "] registered ",
                 shard,
                 cancellableThreads,
@@ -222,7 +214,7 @@ public class RecoverySourceHandler {
                 && isTargetSameHistory()
                 && shard.hasCompleteHistoryOperations("peer-recovery", historySource, request.startingSeqNo())
                 && (historySource == Engine.HistorySource.TRANSLOG
-                    || (retentionLeaseRef.get() != null && retentionLeaseRef.get().retainingSequenceNumber() <= request.startingSeqNo()));
+                || (retentionLeaseRef.get() != null && retentionLeaseRef.get().retainingSequenceNumber() <= request.startingSeqNo()));
             // NB check hasCompleteHistoryOperations when computing isSequenceNumberBasedRecovery, even if there is a retention lease,
             // because when doing a rolling upgrade from earlier than 7.4 we may create some leases that are initially unsatisfied. It's
             // possible there are other cases where we cannot satisfy all leases, because that's not a property we currently expect to hold.
@@ -613,7 +605,7 @@ public class RecoverySourceHandler {
 
     private boolean canUseSnapshots() {
         return useSnapshots && request.canDownloadSnapshotFiles()
-        // Avoid using snapshots for searchable snapshots as these are implicitly recovered from a snapshot
+            // Avoid using snapshots for searchable snapshots as these are implicitly recovered from a snapshot
             && SearchableSnapshotsSettings.isSearchableSnapshotStore(shard.indexSettings().getSettings()) == false;
     }
 
@@ -1103,13 +1095,13 @@ public class RecoverySourceHandler {
             final long targetLocalCheckpoint = sender.targetLocalCheckpoint.get();
             assert snapshot.totalOperations() == snapshot.skippedOperations() + skippedOps + totalSentOps
                 : String.format(
-                    Locale.ROOT,
-                    "expected total [%d], overridden [%d], skipped [%d], total sent [%d]",
-                    snapshot.totalOperations(),
-                    snapshot.skippedOperations(),
-                    skippedOps,
-                    totalSentOps
-                );
+                Locale.ROOT,
+                "expected total [%d], overridden [%d], skipped [%d], total sent [%d]",
+                snapshot.totalOperations(),
+                snapshot.skippedOperations(),
+                skippedOps,
+                totalSentOps
+            );
             stopWatch.stop();
             final TimeValue tookTime = stopWatch.totalTime();
             logger.trace("recovery [phase2]: took [{}]", tookTime);
@@ -1390,7 +1382,8 @@ public class RecoverySourceHandler {
                     if (currentInput == null) {
                         // no input => reading directly from the metadata
                         assert md.hashEqualsContents();
-                        return new FileChunk(md, new BytesArray(md.hash()), 0, true, () -> {});
+                        return new FileChunk(md, new BytesArray(md.hash()), 0, true, () -> {
+                        });
                     }
                     final byte[] buffer = acquireBuffer();
                     final int toRead = Math.toIntExact(Math.min(md.length() - offset, buffer.length));
@@ -1420,7 +1413,7 @@ public class RecoverySourceHandler {
 
                 @Override
                 protected void handleError(StoreFileMetadata md, Exception e) throws Exception {
-                    handleErrorOnSendFiles(store, e, new StoreFileMetadata[] { md });
+                    handleErrorOnSendFiles(store, e, new StoreFileMetadata[]{md});
                 }
 
                 @Override

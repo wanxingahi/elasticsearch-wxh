@@ -222,11 +222,9 @@ public class PeerRecoverySourceService extends AbstractLifecycleComponent implem
             }
         }
 
-        synchronized void reestablishRecovery(
-            ReestablishRecoveryRequest request,
-            IndexShard shard,
-            ActionListener<RecoveryResponse> listener
-        ) {
+        synchronized void reestablishRecovery(ReestablishRecoveryRequest request,
+                                              IndexShard shard,
+                                              ActionListener<RecoveryResponse> listener) {
             assert lifecycle.started();
             final ShardRecoveryContext shardContext = ongoingRecoveries.get(shard);
             if (shardContext == null) {
@@ -304,16 +302,11 @@ public class PeerRecoverySourceService extends AbstractLifecycleComponent implem
             /**
              * Adds recovery source handler.
              */
-            synchronized Tuple<RecoverySourceHandler, RemoteRecoveryTargetHandler> addNewRecovery(
-                StartRecoveryRequest request,
-                IndexShard shard
-            ) {
+            synchronized Tuple<RecoverySourceHandler, RemoteRecoveryTargetHandler> addNewRecovery(StartRecoveryRequest request,
+                                                                                                  IndexShard shard) {
                 for (RecoverySourceHandler existingHandler : recoveryHandlers.keySet()) {
                     if (existingHandler.getRequest().targetAllocationId().equals(request.targetAllocationId())) {
-                        throw new DelayRecoveryException(
-                            "recovery with same target already registered, waiting for "
-                                + "previous recovery attempt to be cancelled or completed"
-                        );
+                        throw new DelayRecoveryException("recovery with same target already registered, waiting for previous recovery attempt to be cancelled or completed");
                     }
                 }
                 final Tuple<RecoverySourceHandler, RemoteRecoveryTargetHandler> handlers = createRecoverySourceHandler(request, shard);
@@ -341,10 +334,8 @@ public class PeerRecoverySourceService extends AbstractLifecycleComponent implem
                 handler.addListener(listener);
             }
 
-            private Tuple<RecoverySourceHandler, RemoteRecoveryTargetHandler> createRecoverySourceHandler(
-                StartRecoveryRequest request,
-                IndexShard shard
-            ) {
+            private Tuple<RecoverySourceHandler, RemoteRecoveryTargetHandler> createRecoverySourceHandler(StartRecoveryRequest request,
+                                                                                                          IndexShard shard) {
                 RecoverySourceHandler handler;
                 final RemoteRecoveryTargetHandler recoveryTarget = new RemoteRecoveryTargetHandler(
                     request.recoveryId(),
